@@ -1,0 +1,16 @@
+resolver:
+  lts-5.18
+
+packages:
+- '.'
+
+extra-deps:
+  [ language-dot-0.1.0
+  , text-conversions-0.1.0
+  ]
+
+flags:
+  {}
+
+extra-package-dbs:
+  []
