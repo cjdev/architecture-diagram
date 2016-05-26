@@ -6,11 +6,13 @@ module ArchitectureDiagram.Console.Types
   , Graph(..)
   ) where
 
+import qualified Data.Map as Map
 import GHC.Generics
-import Data.Map (Map)
-import Data.Text (Text)
 import Data.Aeson
 import Data.Aeson.TH
+import Data.Default
+import Data.Map (Map)
+import Data.Text (Text)
 
 import ArchitectureDiagram.Aeson (dropPrefixOptions)
 
@@ -30,5 +32,11 @@ data Graph = Graph
   { _gNodes :: Nodes
   } deriving (Show, Eq, Generic)
 
+instance Default Graph where
+  def = Graph Map.empty
+
+$(deriveToJSON (dropPrefixOptions "_n") ''Node)
 $(deriveFromJSON (dropPrefixOptions "_n") ''Node)
+
+$(deriveToJSON (dropPrefixOptions "_g") ''Graph)
 $(deriveFromJSON (dropPrefixOptions "_g") ''Graph)

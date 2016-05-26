@@ -1,6 +1,7 @@
 module Main where
 
-import ArchitectureDiagram.Console (stub)
+import Wiring
+import ArchitectureDiagram.Console.Generate
 
 main :: IO ()
-main = putStrLn stub
+main = generate
