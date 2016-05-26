@@ -36,8 +36,7 @@ library
     ArchitectureDiagram.Console
     ArchitectureDiagram.Console.Class
     ArchitectureDiagram.Console.Types
-    ArchitectureDiagram.Console.Impl.Abstract
-    ArchitectureDiagram.FileManager.Class
+    ArchitectureDiagram.Console.Generate
   build-depends:
       base >= 4.7 && < 5
     , language-dot

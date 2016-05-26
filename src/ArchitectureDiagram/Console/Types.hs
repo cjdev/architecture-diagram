@@ -30,8 +30,5 @@ data Graph = Graph
   { _gNodes :: Nodes
   } deriving (Show, Eq, Generic)
 
-$(deriveToJSON (dropPrefixOptions "_n") ''Node)
 $(deriveFromJSON (dropPrefixOptions "_n") ''Node)
-
-$(deriveToJSON (dropPrefixOptions "_g") ''Graph)
 $(deriveFromJSON (dropPrefixOptions "_g") ''Graph)
