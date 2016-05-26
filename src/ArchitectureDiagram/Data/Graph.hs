@@ -26,5 +26,3 @@ toGraph graph = Dot.Graph UnstrictGraph DirectedGraph (Just $ StringId (fromText
     ] ++
     (map toStatement (_gNodes graph))
   )
-
-

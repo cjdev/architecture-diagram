@@ -10,10 +10,10 @@ import ArchitectureDiagram.Data.Node
 import ArchitectureDiagram.Data.Edge
 import ArchitectureDiagram.Data.Graph
 
-
 stub :: String
 stub = renderDot (toGraph $ Graph "AWS" nodes)
   where
+    nodes :: [Node]
     nodes =
       [ Node "LoadBalancer" Box3d [] Nothing []
       , Node "Proxy" Record [] Nothing
