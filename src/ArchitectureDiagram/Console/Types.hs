@@ -27,20 +27,26 @@ data Node = Node
 type Nodes = Map Text Node
 
 data Edge = Edge
-  deriving (Show, Eq)
+  { _eFrom :: Text
+  , _eTo :: Text
+  } deriving (Show, Eq, Generic)
 
-type Edges = Map Text Edge
+type Edges = [Edge]
 
 data Graph = Graph
   { _gName :: Text
   , _gNodes :: Nodes
+  , _gEdges :: Edges
   } deriving (Show, Eq, Generic)
 
 instance Default Graph where
-  def = Graph "default" Map.empty
+  def = Graph "default" Map.empty []
 
 $(deriveToJSON (dropPrefixOptions "_n") ''Node)
 $(deriveFromJSON (dropPrefixOptions "_n") ''Node)
+
+$(deriveToJSON (dropPrefixOptions "_e") ''Edge)
+$(deriveFromJSON (dropPrefixOptions "_e") ''Edge)
 
 $(deriveToJSON (dropPrefixOptions "_g") ''Graph)
 $(deriveFromJSON (dropPrefixOptions "_g") ''Graph)
