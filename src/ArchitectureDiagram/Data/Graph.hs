@@ -26,5 +26,6 @@ toDotGraph graph = Dot.Graph UnstrictGraph DirectedGraph (Just $ StringId (fromT
     , AssignmentStatement (NameId "rankdir") (NameId "TB")
     , AssignmentStatement (NameId "compound") (NameId "true")
     ] ++
-    (map toStatement (_gNodes graph))
+    (map toStatement (_gNodes graph)) ++
+    (map toStatement (_gEdges graph))
   )

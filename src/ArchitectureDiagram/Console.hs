@@ -11,13 +11,17 @@ import ArchitectureDiagram.Data.Edge
 import ArchitectureDiagram.Data.Graph
 
 stub :: String
-stub = renderDot (toDotGraph $ Graph "AWS" nodes [])
+stub = renderDot (toDotGraph $ Graph "AWS" nodes edges)
   where
     nodes :: [Node]
     nodes =
-      [ Node "LoadBalancer" Box3d [] Nothing []
-      , Node "Proxy" Record [] Nothing
-          [ Node "NginxProxy" Record [Rounded] Nothing []
-          , Node "HelloResource" Record [Rounded] Nothing []
+      [ Node "NodeA" Box3d [] Nothing []
+      , Node "ClusterA" Record [] Nothing
+          [ Node "NodeB" Record [Rounded] Nothing []
+          , Node "NodeC" Record [Rounded] Nothing []
           ]
+      ]
+    edges :: [Edge]
+    edges =
+      [ Edge [] "NodeA" "NodeB" From
       ]

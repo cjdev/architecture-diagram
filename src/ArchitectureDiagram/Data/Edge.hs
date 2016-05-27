@@ -29,8 +29,8 @@ data Edge = Edge
 
 instance ToStatement Edge where
   toStatement e = EdgeStatement
-    [ ENodeId DirectedEdge (NodeId (StringId $ fromText (_eFrom e)) Nothing)
-    , ENodeId NoEdge (NodeId (StringId $ fromText (_eTo e)) Nothing)
+    [ ENodeId NoEdge (NodeId (StringId $ fromText (_eFrom e)) Nothing)
+    , ENodeId DirectedEdge (NodeId (StringId $ fromText (_eTo e)) Nothing)
     ]
     rankAttribute
     where
