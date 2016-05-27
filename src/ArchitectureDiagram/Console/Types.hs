@@ -1,5 +1,6 @@
 {-# LANGUAGE TemplateHaskell #-}
 {-# LANGUAGE DeriveGeneric #-}
+{-# LANGUAGE OverloadedStrings #-}
 module ArchitectureDiagram.Console.Types
   ( Node(..)
   , Nodes
@@ -31,11 +32,12 @@ data Edge = Edge
 type Edges = Map Text Edge
 
 data Graph = Graph
-  { _gNodes :: Nodes
+  { _gName :: Text
+  , _gNodes :: Nodes
   } deriving (Show, Eq, Generic)
 
 instance Default Graph where
-  def = Graph Map.empty
+  def = Graph "default" Map.empty
 
 $(deriveToJSON (dropPrefixOptions "_n") ''Node)
 $(deriveFromJSON (dropPrefixOptions "_n") ''Node)
