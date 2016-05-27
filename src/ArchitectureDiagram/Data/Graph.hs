@@ -1,7 +1,7 @@
 {-# LANGUAGE OverloadedStrings #-}
 module ArchitectureDiagram.Data.Graph
   ( Graph(..)
-  , toGraph
+  , toDotGraph
   ) where
 
 import qualified Language.Dot.Syntax as Dot
@@ -17,8 +17,8 @@ data Graph = Graph
   , _gNodes :: [Node]
   } deriving (Show, Eq)
 
-toGraph :: Graph -> Dot.Graph
-toGraph graph = Dot.Graph UnstrictGraph DirectedGraph (Just $ StringId (fromText $ _gName graph))
+toDotGraph :: Graph -> Dot.Graph
+toDotGraph graph = Dot.Graph UnstrictGraph DirectedGraph (Just $ StringId (fromText $ _gName graph))
   ( 
     [ AssignmentStatement (NameId "ranksep") (IntegerId 1)
     , AssignmentStatement (NameId "rankdir") (NameId "TB")
