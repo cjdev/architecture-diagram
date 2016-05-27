@@ -10,11 +10,13 @@ import Data.Text.Conversions (fromText)
 import Language.Dot.Syntax hiding (Graph)
 
 import ArchitectureDiagram.Data.Node (Node)
+import ArchitectureDiagram.Data.Edge (Edge)
 import ArchitectureDiagram.Data.ToStatement (toStatement)
 
 data Graph = Graph
   { _gName :: Text
   , _gNodes :: [Node]
+  , _gEdges :: [Edge]
   } deriving (Show, Eq)
 
 toDotGraph :: Graph -> Dot.Graph

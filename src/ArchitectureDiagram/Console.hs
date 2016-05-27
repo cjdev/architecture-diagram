@@ -11,7 +11,7 @@ import ArchitectureDiagram.Data.Edge
 import ArchitectureDiagram.Data.Graph
 
 stub :: String
-stub = renderDot (toDotGraph $ Graph "AWS" nodes)
+stub = renderDot (toDotGraph $ Graph "AWS" nodes [])
   where
     nodes :: [Node]
     nodes =

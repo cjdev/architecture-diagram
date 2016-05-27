@@ -22,12 +22,12 @@ spec :: Spec
 spec = do
   describe "architecture diagram graph to dot graph" $ do
     it "should create an empty graph" $ do
-      let actual = toDotGraph $ Graph "empty" []
+      let actual = toDotGraph $ Graph "empty" [] []
       let expected = Dot.Graph UnstrictGraph DirectedGraph (Just $ StringId "empty") prependStatements
       actual `shouldBe` expected
     it "should create a graph with a node" $ do
       let stubNode = Node "nodey" Record [] Nothing []
-      let actual = toDotGraph $ Graph "noder" [stubNode]
-      let expected = Dot.Graph UnstrictGraph DirectedGraph (Just $ StringId "noder") 
+      let actual = toDotGraph $ Graph "noder" [stubNode] []
+      let expected = Dot.Graph UnstrictGraph DirectedGraph (Just $ StringId "noder")
             (prependStatements ++ [ toStatement stubNode ] )
       actual `shouldBe` expected

@@ -12,7 +12,7 @@ import qualified ArchitectureDiagram.Data.Node as Data
 import ArchitectureDiagram.Console.Types
 
 toDataGraph :: Graph -> Data.Graph
-toDataGraph g = Data.Graph (_gName g) (toDataNodes $ _gNodes g)
+toDataGraph g = Data.Graph (_gName g) (toDataNodes $ _gNodes g) []
 
 toDataNodes :: Nodes -> [Data.Node]
 toDataNodes = map toDataNode . Map.toList
