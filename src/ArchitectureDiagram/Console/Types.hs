@@ -2,7 +2,9 @@
 {-# LANGUAGE DeriveGeneric #-}
 module ArchitectureDiagram.Console.Types
   ( Node(..)
+  , Nodes
   , Edge(..)
+  , Edges
   , Graph(..)
   ) where
 
