@@ -1,0 +1,31 @@
+{
+  "name": "diagramA",
+  "nodes": {
+    "node_a": {
+      "name": "node_a"
+    },
+    "node_b": {
+      "name": "node_b"
+    },
+    "node_c": {
+      "name": "node_c"
+    },
+    "node_d": {
+      "name": "node_d"
+    }
+  },
+  "edges": [
+    {
+      "to": "node_a",
+      "from": "node_b"
+    },
+    {
+      "to": "node_b",
+      "from": "node_c"
+    },
+    {
+      "to": "node_b",
+      "from": "node_d"
+    }
+  ]
+}
