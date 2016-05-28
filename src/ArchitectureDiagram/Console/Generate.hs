@@ -20,7 +20,7 @@ generate = do
   contents <- readStdin
   case decode contents of
     Nothing -> do
-      writeStderr "unable to parse input"
+      writeStderr "Unable to parse input\n"
       failure
     Just graph -> do
       let dotGraph = toGraph $ toDataGraph graph
