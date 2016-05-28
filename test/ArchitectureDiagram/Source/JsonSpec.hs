@@ -1,5 +1,5 @@
 {-# LANGUAGE OverloadedStrings #-}
-module ArchitectureDiagram.Console.AdaptSpec (spec) where
+module ArchitectureDiagram.Source.JsonSpec (spec) where
 
 import Test.Hspec
 
@@ -8,8 +8,7 @@ import qualified Data.Map as Map
 import qualified ArchitectureDiagram.Data.Graph as Data
 import qualified ArchitectureDiagram.Data.Node as Data
 import qualified ArchitectureDiagram.Data.Edge as Data
-import ArchitectureDiagram.Console.Types
-import ArchitectureDiagram.Console.Adapt
+import ArchitectureDiagram.Source.Json
 
 spec :: Spec
 spec = do

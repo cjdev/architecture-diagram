@@ -5,13 +5,13 @@ module ArchitectureDiagram.Console
 
 import Language.Dot.Pretty (renderDot)
 
-import ArchitectureDiagram.Data.ToStatement
 import ArchitectureDiagram.Data.Node
 import ArchitectureDiagram.Data.Edge
 import ArchitectureDiagram.Data.Graph
+import ArchitectureDiagram.Target.Dot
 
 stub :: String
-stub = renderDot (toDotGraph $ Graph "AWS" nodes edges)
+stub = renderDot (toGraph $ Graph "AWS" nodes edges)
   where
     nodes :: [Node]
     nodes =

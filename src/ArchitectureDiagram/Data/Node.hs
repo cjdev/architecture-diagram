@@ -8,9 +8,6 @@ module ArchitectureDiagram.Data.Node
 import Data.Text (Text)
 import Data.Text.Conversions (ToText(..), convertText, fromText)
 import Data.List (intercalate)
-import Language.Dot.Syntax
-
-import ArchitectureDiagram.Data.ToStatement (ToStatement(..))
 
 data Shape
   = Record
@@ -35,23 +32,3 @@ data Node = Node
   , _nWidth :: Maybe Float
   , _nChildren :: [Node]
   } deriving (Show, Eq)
-
-instance ToStatement Node where
-  toStatement n = if null (_nChildren n) then toNodeStatement n else toClusterStatement n
-
-toNodeStatement :: Node -> Statement
-toNodeStatement n = NodeStatement
-  (NodeId (StringId $ fromText (_nName n)) Nothing)
-  (
-    [ AttributeSetValue (NameId "shape") (StringId $ convertText (_nShape n)) ] ++
-    (if null (_nStyles n) then [] else [ AttributeSetValue (NameId "style") (StringId $ intercalate "," (map convertText (_nStyles n))) ]) ++
-    (maybe [] (\width -> [ AttributeSetValue (NameId "width") (FloatId width) ]) (_nWidth n))
-  )
-
-toClusterStatement :: Node -> Statement
-toClusterStatement n = SubgraphStatement $ NewSubgraph
-  (Just . StringId . fromText $ "cluster_" `mappend` _nName n)
-  ( 
-    [ AssignmentStatement (NameId "label") (StringId . fromText $ _nName n) ] ++
-    (map toStatement $ _nChildren n)
-  )

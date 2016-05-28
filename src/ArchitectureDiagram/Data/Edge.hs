@@ -9,8 +9,6 @@ import Language.Dot.Syntax
 import Data.Text (Text)
 import Data.Text.Conversions (fromText)
 
-import ArchitectureDiagram.Data.ToStatement (ToStatement(..))
-
 data EdgeStyle
   = Dashed
   deriving (Show, Eq)
@@ -26,15 +24,3 @@ data Edge = Edge
   , _eTo :: Text
   , _eRank :: EdgeRank
   } deriving (Show, Eq)
-
-instance ToStatement Edge where
-  toStatement e = EdgeStatement
-    [ ENodeId NoEdge (NodeId (StringId $ fromText (_eFrom e)) Nothing)
-    , ENodeId DirectedEdge (NodeId (StringId $ fromText (_eTo e)) Nothing)
-    ]
-    rankAttribute
-    where
-      rankAttribute = case _eRank e of
-        To -> [ AttributeSetValue (NameId "dir") (StringId "back") ]
-        From -> []
-      

@@ -12,8 +12,8 @@ import Data.Default (def)
 import Language.Dot.Syntax hiding (Graph)
 
 import ArchitectureDiagram.Console.Class
-import ArchitectureDiagram.Console.Types
 import ArchitectureDiagram.Console.Generate
+import ArchitectureDiagram.Source.Json
 
 data Fixture m = Fixture
   -- Console

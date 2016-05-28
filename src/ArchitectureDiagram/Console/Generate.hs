@@ -11,11 +11,9 @@ import Data.Text (Text)
 import Data.Text.Conversions (convertText, UTF8(..))
 import Language.Dot.Pretty (renderDot)
 
-import ArchitectureDiagram.Console.Types
 import ArchitectureDiagram.Console.Class
-import ArchitectureDiagram.Console.Adapt
-import ArchitectureDiagram.Data.Graph (toDotGraph)
-
+import ArchitectureDiagram.Source.Json
+import ArchitectureDiagram.Target.Dot (toGraph)
 
 generate :: Console m => m ()
 generate = do
@@ -25,6 +23,6 @@ generate = do
       writeStderr "unable to parse input"
       failure
     Just graph -> do
-      let dotGraph = toDotGraph $ toDataGraph graph
+      let dotGraph = toGraph $ toDataGraph graph
       let (UTF8 bytes) = convertText $ renderDot dotGraph
       writeStdout bytes
