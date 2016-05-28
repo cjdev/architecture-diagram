@@ -12,20 +12,17 @@
     },
     "node_d": {
       "name": "node_d"
+    },
+    "node_e": {
+      "name": "node_e"
     }
   },
   "edges": [
-    {
-      "to": "node_a",
-      "from": "node_b"
-    },
-    {
-      "to": "node_b",
-      "from": "node_c"
-    },
-    {
-      "to": "node_b",
-      "from": "node_d"
-    }
+    { "from": "node_b", "to": "node_a" },
+    { "from": "node_c", "to": "node_b" },
+    { "from": "node_c", "to": "node_a" },
+    { "from": "node_d", "to": "node_c" },
+    { "from": "node_d", "to": "node_b" },
+    { "from": "node_b", "to": "node_e" }
   ]
 }
