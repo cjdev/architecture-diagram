@@ -23,7 +23,7 @@ import Data.Text (Text)
 import qualified ArchitectureDiagram.Data.Graph as Data
 import qualified ArchitectureDiagram.Data.Node as Data
 import qualified ArchitectureDiagram.Data.Edge as Data
-import ArchitectureDiagram.Aeson (dropPrefixOptions)
+import ArchitectureDiagram.Source.Json.Aeson (dropPrefixOptions)
 
 data Node = Node
   { _nName :: Text

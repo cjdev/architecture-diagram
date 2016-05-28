@@ -1,4 +1,4 @@
-module ArchitectureDiagram.Aeson
+module ArchitectureDiagram.Source.Json.Aeson
   ( dropPrefixOptions
   ) where
 
