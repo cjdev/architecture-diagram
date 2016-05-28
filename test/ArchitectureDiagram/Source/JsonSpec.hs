@@ -18,13 +18,13 @@ spec = do
       let expected = []
       actual `shouldBe` expected
     it "should take a singleton map and return a singleton list of the adapted node (Nothing)" $ do
-      let actual = toDataNodes $ Map.singleton "key" (Node "node_a" Nothing)
-      let expected = [Data.Node "node_a" Data.Record [] Nothing []]
+      let actual = toDataNodes $ Map.singleton "node_a" (Node "a" Nothing)
+      let expected = [Data.Node "node_a" "a" Data.Record [] Nothing []]
       actual `shouldBe` expected
 
     it "should take a singleton map and return a singleton list of the adapted node (Just)" $ do
-      let actual = toDataNodes $ Map.singleton "key" (Node "node_a" (Just Map.empty))
-      let expected = [Data.Node "node_a" Data.Record [] Nothing []]
+      let actual = toDataNodes $ Map.singleton "node_a" (Node "a" (Just Map.empty))
+      let expected = [Data.Node "node_a" "a" Data.Record [] Nothing []]
       actual `shouldBe` expected
 
     it "should take an console edge and return an adpated edge" $ do

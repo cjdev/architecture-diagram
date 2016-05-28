@@ -22,14 +22,15 @@ instance ToStatement Node where
   toStatement n = if null (_nChildren n) then toNodeStatement n else toClusterStatement n
 
 toNodeStatement :: Node -> Statement
-toNodeStatement n = NodeStatement (nodeId (_nName n)) (toAttributes n)
+toNodeStatement n = NodeStatement (nodeId (_nRef n)) (toAttributes n)
 
 toAttributes :: Node -> [Attribute]
 toAttributes n = attributes ++ catMaybes mAttributes
   where
     attributes :: [Attribute]
     attributes =
-      [ shape (_nShape n)
+      [ label (_nName n)
+      , shape (_nShape n)
       ]
     mAttributes :: [Maybe Attribute]
     mAttributes =
@@ -39,6 +40,9 @@ toAttributes n = attributes ++ catMaybes mAttributes
 
 nodeId :: Text -> NodeId
 nodeId x = NodeId (StringId $ fromText x) Nothing
+
+label :: Text -> Attribute
+label x = AttributeSetValue (NameId "label") (StringId $ fromText x)
 
 shape :: Shape -> Attribute
 shape x = AttributeSetValue (NameId "shape") (StringId $ shapeId x)

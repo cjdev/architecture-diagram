@@ -55,7 +55,7 @@ toDataNodes :: Nodes -> [Data.Node]
 toDataNodes = map toDataNode . Map.toList
 
 toDataNode :: (Text, Node) -> Data.Node
-toDataNode (ref, node) = Data.Node (_nName node) Data.Record [] Nothing []
+toDataNode (ref, node) = Data.Node ref (_nName node) Data.Record [] Nothing []
 
 toDataEdge :: Edge -> Data.Edge
 toDataEdge e = Data.Edge [] (_eFrom e) (_eTo e) Data.From

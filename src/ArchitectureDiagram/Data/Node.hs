@@ -18,7 +18,8 @@ data NodeStyle
   deriving (Show, Eq)
 
 data Node = Node
-  { _nName :: Text
+  { _nRef :: Text
+  , _nName :: Text
   , _nShape :: Shape
   , _nStyles :: [NodeStyle]
   , _nWidth :: Maybe Float
