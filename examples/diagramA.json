@@ -2,19 +2,19 @@
   "name": "diagramA",
   "nodes": {
     "node_a": {
-      "name": "node_a"
+      "name": "a"
     },
     "node_b": {
-      "name": "node_b"
+      "name": "b"
     },
     "node_c": {
-      "name": "node_c"
+      "name": "c"
     },
     "node_d": {
-      "name": "node_d"
+      "name": "d"
     },
     "node_e": {
-      "name": "node_e"
+      "name": "e"
     }
   },
   "edges": [
