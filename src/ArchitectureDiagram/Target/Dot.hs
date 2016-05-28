@@ -6,8 +6,9 @@ module ArchitectureDiagram.Target.Dot
 
 import qualified Language.Dot.Syntax as Dot
 import Data.Text (Text)
-import Data.Text.Conversions (ToText(..), convertText, fromText)
+import Data.Text.Conversions (fromText)
 import Data.List (intercalate)
+import Data.Maybe (catMaybes)
 import Language.Dot.Syntax hiding (Graph)
 
 import ArchitectureDiagram.Data.Node (Node(..), NodeStyle(..), Shape(..))
@@ -21,21 +22,51 @@ instance ToStatement Node where
   toStatement n = if null (_nChildren n) then toNodeStatement n else toClusterStatement n
 
 toNodeStatement :: Node -> Statement
-toNodeStatement n = NodeStatement
-  (NodeId (StringId $ fromText (_nName n)) Nothing)
-  (
-    [ AttributeSetValue (NameId "shape") (StringId $ convertText (_nShape n)) ] ++
-    (if null (_nStyles n) then [] else [ AttributeSetValue (NameId "style") (StringId $ intercalate "," (map convertText (_nStyles n))) ]) ++
-    (maybe [] (\width -> [ AttributeSetValue (NameId "width") (FloatId width) ]) (_nWidth n))
-  )
+toNodeStatement n = NodeStatement (nodeId (_nName n)) (toAttributes n)
+
+toAttributes :: Node -> [Attribute]
+toAttributes n = attributes ++ catMaybes mAttributes
+  where
+    attributes :: [Attribute]
+    attributes =
+      [ shape (_nShape n)
+      ]
+    mAttributes :: [Maybe Attribute]
+    mAttributes =
+      [ nodeStyles (_nStyles n)
+      , width <$> _nWidth n
+      ]
+
+nodeId :: Text -> NodeId
+nodeId x = NodeId (StringId $ fromText x) Nothing
+
+shape :: Shape -> Attribute
+shape x = AttributeSetValue (NameId "shape") (StringId $ shapeId x)
+
+shapeId :: Shape -> String
+shapeId Record = "record"
+shapeId Box3d = "box3d"
+
+nodeStyles :: [NodeStyle] -> Maybe Attribute
+nodeStyles xs
+  | null xs = Nothing
+  | otherwise = Just $ AttributeSetValue (NameId "style") (StringId $ intercalate "," (map nodeStyleId xs))
+
+nodeStyleId :: NodeStyle -> String
+nodeStyleId Rounded = "rounded"
+
+width :: Float -> Attribute
+width x = AttributeSetValue (NameId "width") (FloatId x)
 
 toClusterStatement :: Node -> Statement
-toClusterStatement n = SubgraphStatement $ NewSubgraph
-  (Just . StringId . fromText $ "cluster_" `mappend` _nName n)
-  ( 
-    [ AssignmentStatement (NameId "label") (StringId . fromText $ _nName n) ] ++
-    (map toStatement $ _nChildren n)
-  )
+toClusterStatement n = SubgraphStatement $ NewSubgraph (clusterId (_nName n)) statements
+  where
+    statements =
+      [ AssignmentStatement (NameId "label") (StringId . fromText $ _nName n) ] ++
+      (map toStatement $ _nChildren n)
+
+clusterId :: Text -> Maybe Id
+clusterId x = Just . StringId . fromText $ "cluster_" `mappend` x
 
 instance ToStatement Edge where
   toStatement e = EdgeStatement

@@ -6,7 +6,6 @@ module ArchitectureDiagram.Data.Node
  ) where
 
 import Data.Text (Text)
-import Data.Text.Conversions (ToText(..), convertText, fromText)
 import Data.List (intercalate)
 
 data Shape
@@ -14,16 +13,9 @@ data Shape
   | Box3d
   deriving (Show, Eq)
 
-instance ToText Shape where
-  toText Record = "record"
-  toText Box3d = "box3d"
-
 data NodeStyle
   = Rounded
   deriving (Show, Eq)
-
-instance ToText NodeStyle where
-  toText Rounded = "rounded"
 
 data Node = Node
   { _nName :: Text
