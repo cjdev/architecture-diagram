@@ -32,7 +32,6 @@ library
     ArchitectureDiagram.Data.Node
     ArchitectureDiagram.Data.Edge
     ArchitectureDiagram.Data.Graph
-    ArchitectureDiagram.Console
     ArchitectureDiagram.Console.Class
     ArchitectureDiagram.Console.Generate
     ArchitectureDiagram.Console.Impl.IO
