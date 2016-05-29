@@ -18,6 +18,7 @@ import Data.Aeson
 import Data.Aeson.TH
 import Data.Default
 import Data.Map (Map)
+import Data.Maybe (fromMaybe)
 import Data.Text (Text)
 
 import qualified ArchitectureDiagram.Data.Graph as Data
@@ -26,7 +27,7 @@ import qualified ArchitectureDiagram.Data.Edge as Data
 import ArchitectureDiagram.Source.Json.Aeson (dropPrefixOptions)
 
 data Node = Node
-  { _nName :: Text
+  { _nName :: Maybe Text
   , _nChildren :: Maybe Nodes
   } deriving (Show, Eq, Generic)
 
@@ -55,7 +56,7 @@ toDataNodes :: Nodes -> [Data.Node]
 toDataNodes = map toDataNode . Map.toList
 
 toDataNode :: (Text, Node) -> Data.Node
-toDataNode (ref, node) = Data.Node ref (_nName node) Data.Record [] Nothing []
+toDataNode (ref, node) = Data.Node ref (fromMaybe ref (_nName node)) Data.Record [] Nothing []
 
 toDataEdge :: Edge -> Data.Edge
 toDataEdge e = Data.Edge [] (_eFrom e) (_eTo e) Data.From

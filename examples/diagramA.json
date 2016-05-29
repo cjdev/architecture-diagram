@@ -2,7 +2,6 @@
   "name": "diagramA",
   "nodes": {
     "node_a": {
-      "name": "a"
     },
     "node_b": {
       "name": "b"
