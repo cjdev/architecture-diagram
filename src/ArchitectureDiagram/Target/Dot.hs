@@ -11,7 +11,7 @@ import Data.List (intercalate)
 import Data.Maybe (catMaybes)
 import Language.Dot.Syntax hiding (Graph)
 
-import ArchitectureDiagram.Data.Node (Node(..), NodeStyle(..), Shape(..))
+import ArchitectureDiagram.Data.Node (Node(..), NodeRef(..), NodeStyle(..), Shape(..))
 import ArchitectureDiagram.Data.Edge (Edge(..), EdgeStyle(..), EdgeRank(..))
 import ArchitectureDiagram.Data.Graph (Graph(..))
 
@@ -22,7 +22,7 @@ instance ToStatement Node where
   toStatement n = if null (_nChildren n) then toNodeStatement n else toClusterStatement n
 
 toNodeStatement :: Node -> Statement
-toNodeStatement n = NodeStatement (nodeId (_nRef n)) (toAttributes n)
+toNodeStatement n = NodeStatement (nodeId (unNodeRef $ _nRef n)) (toAttributes n)
 
 toAttributes :: Node -> [Attribute]
 toAttributes n = attributes ++ catMaybes mAttributes
