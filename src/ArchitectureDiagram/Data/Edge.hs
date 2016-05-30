@@ -5,7 +5,6 @@ module ArchitectureDiagram.Data.Edge
  , EdgeRank(..)
  ) where
 
-import Language.Dot.Syntax
 import Data.Text (Text)
 import Data.Text.Conversions (fromText)
 

@@ -23,5 +23,9 @@
     { "from": "node_d", "to": "node_c" },
     { "from": "node_d", "to": "node_b" },
     { "from": "node_b", "to": "node_e" }
-  ]
+  ],
+  "nodeTypes": {
+  },
+  "edgeTypes": {
+  }
 }

@@ -32,6 +32,7 @@ spec = do
       let expected = [Data.Node "node_a" "a" Data.Record [] Nothing []]
       actual `shouldBe` expected
 
+  describe "toDataEdge" $ do
     it "should take an console edge and return an adpated edge" $ do
       let actual = toDataEdge $ Edge "node_a" "node_b"
       let expected = Data.Edge [] "node_a" "node_b" Data.From

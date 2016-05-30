@@ -4,8 +4,12 @@
 module ArchitectureDiagram.Source.Json
   ( Node(..)
   , Nodes
+  , NodeType(..)
+  , NodeTypes
   , Edge(..)
   , Edges
+  , EdgeType(..)
+  , EdgeTypes
   , Graph(..)
   , toDataGraph
   , toDataNodes
@@ -33,6 +37,11 @@ data Node = Node
 
 type Nodes = Map Text Node
 
+data NodeType = NodeType
+  deriving (Show, Eq, Generic)
+
+type NodeTypes = Map Text NodeType
+
 data Edge = Edge
   { _eFrom :: Text
   , _eTo :: Text
@@ -40,14 +49,21 @@ data Edge = Edge
 
 type Edges = [Edge]
 
+data EdgeType = EdgeType
+  deriving (Show, Eq, Generic)
+
+type EdgeTypes = Map Text EdgeType
+
 data Graph = Graph
   { _gName :: Text
   , _gNodes :: Nodes
+  , _gNodeTypes :: NodeTypes
   , _gEdges :: Edges
+  , _gEdgeTypes :: EdgeTypes
   } deriving (Show, Eq, Generic)
 
 instance Default Graph where
-  def = Graph "default" Map.empty []
+  def = Graph "default" Map.empty Map.empty [] Map.empty
 
 toDataGraph :: Graph -> Data.Graph
 toDataGraph g = Data.Graph (_gName g) (toDataNodes $ _gNodes g) (map toDataEdge $ _gEdges g)
@@ -64,8 +80,14 @@ toDataEdge e = Data.Edge [] (_eFrom e) (_eTo e) Data.From
 $(deriveToJSON (dropPrefixOptions "_n") ''Node)
 $(deriveFromJSON (dropPrefixOptions "_n") ''Node)
 
+$(deriveToJSON (dropPrefixOptions "_nt") ''NodeType)
+$(deriveFromJSON (dropPrefixOptions "_nt") ''NodeType)
+
 $(deriveToJSON (dropPrefixOptions "_e") ''Edge)
 $(deriveFromJSON (dropPrefixOptions "_e") ''Edge)
+
+$(deriveToJSON (dropPrefixOptions "_et") ''EdgeType)
+$(deriveFromJSON (dropPrefixOptions "_et") ''EdgeType)
 
 $(deriveToJSON (dropPrefixOptions "_g") ''Graph)
 $(deriveFromJSON (dropPrefixOptions "_g") ''Graph)
