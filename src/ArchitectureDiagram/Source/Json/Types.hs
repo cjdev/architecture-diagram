@@ -1,7 +1,7 @@
 {-# LANGUAGE TemplateHaskell #-}
 {-# LANGUAGE DeriveGeneric #-}
 {-# LANGUAGE OverloadedStrings #-}
-module ArchitectureDiagram.Source.Json
+module ArchitectureDiagram.Source.Json.Types
   ( Node(..)
   , Nodes
   , NodeType(..)
@@ -11,9 +11,6 @@ module ArchitectureDiagram.Source.Json
   , EdgeType(..)
   , EdgeTypes
   , Graph(..)
-  , toDataGraph
-  , toDataNodes
-  , toDataEdge
   ) where
 
 import qualified Data.Map as Map
@@ -25,9 +22,6 @@ import Data.Map (Map)
 import Data.Maybe (fromMaybe)
 import Data.Text (Text)
 
-import qualified ArchitectureDiagram.Data.Graph as Data
-import qualified ArchitectureDiagram.Data.Node as Data
-import qualified ArchitectureDiagram.Data.Edge as Data
 import ArchitectureDiagram.Source.Json.Aeson (dropPrefixOptions)
 
 data Node = Node
@@ -38,7 +32,8 @@ data Node = Node
 type Nodes = Map Text Node
 
 data NodeType = NodeType
-  deriving (Show, Eq, Generic)
+  { _ntColor :: Maybe Text
+  } deriving (Show, Eq, Generic)
 
 type NodeTypes = Map Text NodeType
 
@@ -64,18 +59,6 @@ data Graph = Graph
 
 instance Default Graph where
   def = Graph "default" Map.empty Map.empty [] Map.empty
-
-toDataGraph :: Graph -> Data.Graph
-toDataGraph g = Data.Graph (_gName g) (toDataNodes $ _gNodes g) (map toDataEdge $ _gEdges g)
-
-toDataNodes :: Nodes -> Map Data.NodeRef Data.Node
-toDataNodes = Map.mapKeys Data.NodeRef . Map.mapWithKey toDataNode
-
-toDataNode :: Text -> Node -> Data.Node
-toDataNode ref node = Data.Node (fromMaybe ref (_nName node)) Data.Record [] Nothing Map.empty
-
-toDataEdge :: Edge -> Data.Edge
-toDataEdge e = Data.Edge [] (_eFrom e) (_eTo e) Data.From
 
 $(deriveToJSON (dropPrefixOptions "_n") ''Node)
 $(deriveFromJSON (dropPrefixOptions "_n") ''Node)

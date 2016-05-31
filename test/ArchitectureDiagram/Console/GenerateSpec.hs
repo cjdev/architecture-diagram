@@ -13,7 +13,7 @@ import Language.Dot.Syntax hiding (Graph)
 
 import ArchitectureDiagram.Console.Class
 import ArchitectureDiagram.Console.Generate
-import ArchitectureDiagram.Source.Json
+import ArchitectureDiagram.Source.Json.Types
 
 data Fixture m = Fixture
   -- Console

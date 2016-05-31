@@ -8,7 +8,8 @@ import qualified Data.Map as Map
 import qualified ArchitectureDiagram.Data.Graph as Data
 import qualified ArchitectureDiagram.Data.Node as Data
 import qualified ArchitectureDiagram.Data.Edge as Data
-import ArchitectureDiagram.Source.Json
+import ArchitectureDiagram.Source.Json.Types
+import ArchitectureDiagram.Source.Json.Adapt
 
 spec :: Spec
 spec = do

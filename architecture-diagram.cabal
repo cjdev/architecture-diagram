@@ -35,7 +35,8 @@ library
     ArchitectureDiagram.Console.Class
     ArchitectureDiagram.Console.Generate
     ArchitectureDiagram.Console.Impl.IO
-    ArchitectureDiagram.Source.Json
+    ArchitectureDiagram.Source.Json.Types
+    ArchitectureDiagram.Source.Json.Adapt
     ArchitectureDiagram.Target.Dot
   build-depends:
       base >= 4.7 && < 5

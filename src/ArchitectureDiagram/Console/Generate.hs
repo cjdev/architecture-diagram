@@ -12,7 +12,7 @@ import Data.Text.Conversions (convertText, UTF8(..))
 import Language.Dot.Pretty (renderDot)
 
 import ArchitectureDiagram.Console.Class
-import ArchitectureDiagram.Source.Json
+import ArchitectureDiagram.Source.Json.Adapt
 import ArchitectureDiagram.Target.Dot (toGraph)
 
 generate :: Console m => m ()
