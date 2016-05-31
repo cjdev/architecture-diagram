@@ -4,6 +4,7 @@ module ArchitectureDiagram.Target.DotSpec (spec) where
 import Test.Hspec
 
 import qualified Language.Dot.Syntax as Dot
+import qualified Data.Map as Map
 import Data.Text (Text)
 import Language.Dot.Syntax hiding (Graph)
 
@@ -23,7 +24,7 @@ spec :: Spec
 spec = do
   describe "architecture diagram nodes to dot statements" $ do
     it "should convert the bare minimium node with a record shape" $ do
-      let actual = toStatement $ Node "node_n" "n" Record [] Nothing []
+      let actual = toStatement $ ("node_n" :: NodeRef, Node "n" Record [] Nothing Map.empty)
       let expected = NodeStatement
             (NodeId (StringId "node_n") Nothing)
             [ AttributeSetValue (NameId "label") (StringId "n")
@@ -32,7 +33,7 @@ spec = do
       actual `shouldBe` expected
 
     it "should convert the bare minimium node with a box3d shape" $ do
-      let actual = toStatement $ Node "node_n" "n" Box3d [] Nothing []
+      let actual = toStatement $ ("node_n" :: NodeRef, Node "n" Box3d [] Nothing Map.empty)
       let expected = NodeStatement
             (NodeId (StringId "node_n") Nothing)
             [ AttributeSetValue (NameId "label") (StringId "n")
@@ -41,7 +42,7 @@ spec = do
       actual `shouldBe` expected
     
     it "should convert the node with a rounded style" $ do
-      let actual = toStatement $ Node "node_n" "n" Record [Rounded] Nothing []
+      let actual = toStatement $ ("node_n" :: NodeRef, Node "n" Record [Rounded] Nothing Map.empty)
       let expected = NodeStatement
             (NodeId (StringId "node_n") Nothing)
             [ AttributeSetValue (NameId "label") (StringId "n")
@@ -51,7 +52,7 @@ spec = do
       actual `shouldBe` expected
     
     it "should convert the node with a width" $ do
-      let actual = toStatement $ Node "node_n" "n" Record [] (Just 0) []
+      let actual = toStatement $ ("node_n" :: NodeRef, Node "n" Record [] (Just 0) Map.empty)
       let expected = NodeStatement
             (NodeId (StringId "node_n") Nothing)
             [ AttributeSetValue (NameId "label") (StringId "n")
@@ -61,7 +62,7 @@ spec = do
       actual `shouldBe` expected
 
     it "should convert the node to a subgraph" $ do
-      let actual = toStatement $ Node "cluster_c" "c" Record [] Nothing [Node "node_n" "n" Record [] Nothing []]
+      let actual = toStatement $ ("c" :: NodeRef, Node "c" Record [] Nothing (Map.fromList [("node_n", Node "n" Record [] Nothing Map.empty)]))
       let expected = SubgraphStatement $ NewSubgraph (Just $ StringId "cluster_c")
             [ AssignmentStatement (NameId "label") (StringId "c")
             , NodeStatement
@@ -92,30 +93,32 @@ spec = do
 
   describe "architecture diagram graph to dot graph" $ do
     it "should create an empty graph" $ do
-      let actual = toGraph $ Graph "empty" [] []
+      let actual = toGraph $ Graph "empty" Map.empty []
       let expected = Dot.Graph UnstrictGraph DirectedGraph (Just $ StringId "empty") prependStatements
       actual `shouldBe` expected
 
     it "should create a graph with a node" $ do
-      let nodeA = Node "node_a" "a" Record [] Nothing []
-      let actual = toGraph $ Graph "graph" [nodeA] []
+      let nodeA = ("node_a", Node "a" Record [] Nothing Map.empty)
+      let nodes = Map.fromList [nodeA]
+      let actual = toGraph $ Graph "graph" nodes []
       let expected = Dot.Graph UnstrictGraph DirectedGraph (Just $ StringId "graph")
             (prependStatements ++ [ toStatement nodeA ])
       actual `shouldBe` expected
 
     it "should create a graph with nodes" $ do
-      let nodeA = Node "node_a" "a" Record [] Nothing []
-      let nodeB = Node "node_b" "b" Record [] Nothing []
-      let actual = toGraph $ Graph "graph" [nodeA, nodeB] []
+      let nodeA = ("node_a" :: NodeRef, Node "a" Record [] Nothing Map.empty)
+      let nodeB = ("node_b" :: NodeRef, Node "b" Record [] Nothing Map.empty)
+      let nodes = Map.fromList [nodeA, nodeB]
+      let actual = toGraph $ Graph "graph" nodes []
       let expected = Dot.Graph UnstrictGraph DirectedGraph (Just $ StringId "graph")
             (prependStatements ++ [ toStatement nodeA, toStatement nodeB ])
       actual `shouldBe` expected
 
     it "should create a graph with nodes and an edge" $ do
-      let nodeA = Node "node_a" "a" Record [] Nothing []
-      let nodeB = Node "node_b" "b" Record [] Nothing []
+      let nodeA = ("node_a", Node "a" Record [] Nothing Map.empty)
+      let nodeB = ("node_b", Node "b" Record [] Nothing Map.empty)
       let edgeA = Edge [] "node_a" "node_b" From
-      let actual = toGraph $ Graph "graph" [nodeA, nodeB] [edgeA]
+      let actual = toGraph $ Graph "graph" (Map.fromList [nodeA, nodeB]) [edgeA]
       let expected = Dot.Graph UnstrictGraph DirectedGraph (Just $ StringId "graph")
             (prependStatements ++ [ toStatement nodeA, toStatement nodeB, toStatement edgeA ])
       actual `shouldBe` expected

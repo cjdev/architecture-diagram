@@ -1,3 +1,4 @@
+{-# LANGUAGE FlexibleInstances #-}
 {-# LANGUAGE OverloadedStrings #-}
 module ArchitectureDiagram.Target.Dot
   ( ToStatement(..)
@@ -5,6 +6,7 @@ module ArchitectureDiagram.Target.Dot
   ) where
 
 import qualified Language.Dot.Syntax as Dot
+import qualified Data.Map as Map
 import Data.Text (Text)
 import Data.Text.Conversions (fromText)
 import Data.List (intercalate)
@@ -18,11 +20,14 @@ import ArchitectureDiagram.Data.Graph (Graph(..))
 class ToStatement a where
   toStatement :: a -> Statement
 
-instance ToStatement Node where
-  toStatement n = if null (_nChildren n) then toNodeStatement n else toClusterStatement n
+instance ToStatement (NodeRef, Node) where
+  toStatement (ref, node) =
+    if Map.null (_nChildren node)
+      then toNodeStatement ref node
+      else toClusterStatement ref node
 
-toNodeStatement :: Node -> Statement
-toNodeStatement n = NodeStatement (nodeId (unNodeRef $ _nRef n)) (toAttributes n)
+toNodeStatement :: NodeRef -> Node -> Statement
+toNodeStatement ref node = NodeStatement (nodeId (unNodeRef ref)) (toAttributes node)
 
 toAttributes :: Node -> [Attribute]
 toAttributes n = attributes ++ catMaybes mAttributes
@@ -62,15 +67,15 @@ nodeStyleId Rounded = "rounded"
 width :: Float -> Attribute
 width x = AttributeSetValue (NameId "width") (FloatId x)
 
-toClusterStatement :: Node -> Statement
-toClusterStatement n = SubgraphStatement $ NewSubgraph (clusterId (_nName n)) statements
+toClusterStatement :: NodeRef -> Node -> Statement
+toClusterStatement ref node = SubgraphStatement $ NewSubgraph (clusterId ref) statements
   where
     statements =
-      [ AssignmentStatement (NameId "label") (StringId . fromText $ _nName n) ] ++
-      (map toStatement $ _nChildren n)
+      [ AssignmentStatement (NameId "label") (StringId . fromText $ _nName node) ] ++
+      (map toStatement . Map.toList $ _nChildren node)
 
-clusterId :: Text -> Maybe Id
-clusterId x = Just . StringId . fromText $ "cluster_" `mappend` x
+clusterId :: NodeRef -> Maybe Id
+clusterId ref = Just . StringId . fromText $ "cluster_" `mappend` (unNodeRef ref)
 
 instance ToStatement Edge where
   toStatement e = EdgeStatement
@@ -90,6 +95,6 @@ toGraph graph = Dot.Graph UnstrictGraph DirectedGraph (Just $ StringId (fromText
     , AssignmentStatement (NameId "rankdir") (NameId "TB")
     , AssignmentStatement (NameId "compound") (NameId "true")
     ] ++
-    (map toStatement (_gNodes graph)) ++
+    (map toStatement (Map.toList $ _gNodes graph)) ++
     (map toStatement (_gEdges graph))
   )

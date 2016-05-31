@@ -8,6 +8,7 @@ module ArchitectureDiagram.Data.Node
 
 import Data.Aeson (ToJSON, FromJSON)
 import Data.Text (Text)
+import Data.Map (Map)
 import Data.List (intercalate)
 import Data.String (IsString)
 
@@ -21,13 +22,12 @@ data NodeStyle
   deriving (Show, Eq)
 
 newtype NodeRef = NodeRef { unNodeRef :: Text }
-  deriving (Show, Eq, IsString)
+  deriving (Show, Eq, Ord, IsString)
 
 data Node = Node
-  { _nRef :: NodeRef
-  , _nName :: Text
+  { _nName :: Text
   , _nShape :: Shape
   , _nStyles :: [NodeStyle]
   , _nWidth :: Maybe Float
-  , _nChildren :: [Node]
+  , _nChildren :: Map NodeRef Node
   } deriving (Show, Eq)

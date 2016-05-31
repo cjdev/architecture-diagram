@@ -4,13 +4,14 @@ module ArchitectureDiagram.Data.Graph
   ) where
 
 import Data.Text (Text)
+import Data.Map (Map)
 import Data.Text.Conversions (fromText)
 
-import ArchitectureDiagram.Data.Node (Node)
+import ArchitectureDiagram.Data.Node (Node, NodeRef)
 import ArchitectureDiagram.Data.Edge (Edge)
 
 data Graph = Graph
   { _gName :: Text
-  , _gNodes :: [Node]
+  , _gNodes :: Map NodeRef Node
   , _gEdges :: [Edge]
   } deriving (Show, Eq)
