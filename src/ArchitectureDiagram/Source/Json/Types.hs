@@ -40,8 +40,8 @@ data NodeType = NodeType
 type NodeTypes = Map Text NodeType
 
 data Edge = Edge
-  { _eFrom :: Text
-  , _eTo :: Text
+  { _eFrom :: Data.NodeRef
+  , _eTo :: Data.NodeRef
   } deriving (Show, Eq, Generic)
 
 type Edges = [Edge]

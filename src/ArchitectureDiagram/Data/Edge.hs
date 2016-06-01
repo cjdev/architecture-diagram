@@ -8,6 +8,8 @@ module ArchitectureDiagram.Data.Edge
 import Data.Text (Text)
 import Data.Text.Conversions (fromText)
 
+import ArchitectureDiagram.Data.Node (NodeRef)
+
 data EdgeStyle
   = Dashed
   deriving (Show, Eq)
@@ -19,7 +21,7 @@ data EdgeRank
 
 data Edge = Edge
   { _eStyles :: [EdgeStyle]
-  , _eFrom :: Text
-  , _eTo :: Text
+  , _eFrom :: NodeRef
+  , _eTo :: NodeRef
   , _eRank :: EdgeRank
   } deriving (Show, Eq)

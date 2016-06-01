@@ -32,7 +32,7 @@ instance ToStatement (NodeRef, Node) where
       else toClusterStatement ref node
 
 toNodeStatement :: NodeRef -> Node -> Statement
-toNodeStatement ref node = NodeStatement (nodeId (unNodeRef ref)) (toAttributes node)
+toNodeStatement ref node = NodeStatement (nodeId ref) (toAttributes node)
 
 toAttributes :: Node -> [Attribute]
 toAttributes n = attributes ++ catMaybes mAttributes
@@ -48,8 +48,8 @@ toAttributes n = attributes ++ catMaybes mAttributes
       , width <$> _nWidth n
       ]
 
-nodeId :: Text -> NodeId
-nodeId x = NodeId (StringId $ fromText x) Nothing
+nodeId :: NodeRef -> NodeId
+nodeId ref = NodeId (StringId $ fromText (unNodeRef ref)) Nothing
 
 label :: Text -> Attribute
 label x = AttributeSetValue (NameId "label") (StringId $ fromText x)
@@ -73,48 +73,46 @@ width :: Float -> Attribute
 width x = AttributeSetValue (NameId "width") (FloatId x)
 
 toClusterStatement :: NodeRef -> Node -> Statement
-toClusterStatement ref node = SubgraphStatement $ NewSubgraph (clusterId ref) statements
+toClusterStatement ref node = SubgraphStatement $ NewSubgraph (Just $ clusterId ref) statements
   where
     statements =
       [ AssignmentStatement (NameId "label") (StringId . fromText $ _nName node) ] ++
       (map toStatement . Map.toList $ _nChildren node)
 
-clusterId :: NodeRef -> Maybe Id
-clusterId ref = Just . StringId . fromText $ "cluster_" `mappend` (unNodeRef ref)
+clusterId :: NodeRef -> Id
+clusterId ref = StringId . fromText $ "cluster_" `mappend` (unNodeRef ref)
 
 instance ToStatement (NodeLeafest, Edge) where
   toStatement (NodeLeafest leafest, e) = EdgeStatement
-    [ ENodeId NoEdge (NodeId (StringId $ fromText fromEdge) Nothing)
-    , ENodeId DirectedEdge (NodeId (StringId $ fromText toEdge) Nothing)
+    [ ENodeId NoEdge (nodeId fromEdge)
+    , ENodeId DirectedEdge (nodeId toEdge)
     ]
-    (rankAttribute ++ toEdgeClusterAttribute ++ fromEdgeClusterAttribute)
+    (catMaybes
+      [ rankAttribute (_eRank e)
+      , toEdgeClusterAttribute
+      , fromEdgeClusterAttribute
+      ]
+    )
     where
-      rankAttribute = case _eRank e of
-        To -> [ AttributeSetValue (NameId "dir") (StringId "back") ]
-        From -> []
-
       toEdge = fromMaybe (_eTo e) toEdgeLeafest
-      toEdgeLeafest = unNodeRef <$> Map.lookup (NodeRef $ _eTo  e) leafest
-
-      toEdgeClusterAttribute = case toEdgeLeafest of
-        Nothing -> []
-        Just _ -> let
-          cluster = fromText $ "cluster_" `mappend` _eTo e
-          in case _eRank e of
-            To -> [ AttributeSetValue (NameId "ltail") (StringId cluster) ]
-            From -> [ AttributeSetValue (NameId "lhead") (StringId cluster) ]
-
+      toEdgeLeafest = Map.lookup (_eTo e) leafest
       fromEdge = fromMaybe (_eFrom e) fromEdgeLeafest
-      fromEdgeLeafest = unNodeRef <$> Map.lookup (NodeRef $ _eFrom e) leafest
-
+      fromEdgeLeafest = Map.lookup (_eFrom e) leafest
+      toEdgeClusterAttribute = case toEdgeLeafest of
+        Nothing -> Nothing
+        Just _ -> Just $ case _eRank e of
+          To -> AttributeSetValue (NameId "ltail") (clusterId $ _eTo e)
+          From -> AttributeSetValue (NameId "lhead") (clusterId $ _eTo e)
       fromEdgeClusterAttribute = case fromEdgeLeafest of
-        Nothing -> []
-        Just _ -> let
-          cluster = fromText $ "cluster_" `mappend` _eFrom e
-          in case _eRank e of
-            From -> [ AttributeSetValue (NameId "ltail") (StringId cluster) ]
-            To -> [ AttributeSetValue (NameId "lhead") (StringId cluster) ]
+        Nothing -> Nothing
+        Just _ -> Just $ case _eRank e of
+          From -> AttributeSetValue (NameId "ltail") (clusterId $ _eFrom e)
+          To -> AttributeSetValue (NameId "lhead") (clusterId $ _eFrom e)
 
+rankAttribute :: EdgeRank -> Maybe Attribute
+rankAttribute rank = case rank of
+  To -> Just $ AttributeSetValue (NameId "dir") (StringId "back")
+  From -> Nothing
 
 toGraph :: Graph -> Dot.Graph
 toGraph graph = Dot.Graph UnstrictGraph DirectedGraph (Just $ StringId (fromText $ _gName graph))
