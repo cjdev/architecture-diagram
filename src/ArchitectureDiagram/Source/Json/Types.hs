@@ -22,6 +22,7 @@ import Data.Map (Map)
 import Data.Maybe (fromMaybe)
 import Data.Text (Text)
 
+import qualified ArchitectureDiagram.Data.Node as Data
 import ArchitectureDiagram.Source.Json.Aeson (dropPrefixOptions)
 
 data Node = Node
@@ -32,7 +33,7 @@ data Node = Node
 type Nodes = Map Text Node
 
 data NodeType = NodeType
-  { _ntColor :: Maybe Text
+  { _ntStyles :: Maybe [Data.NodeStyle]
   } deriving (Show, Eq, Generic)
 
 type NodeTypes = Map Text NodeType

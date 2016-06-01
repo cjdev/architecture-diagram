@@ -1,6 +1,7 @@
 module ArchitectureDiagram.Source.Json.Adapt
   ( toDataGraph
   , toDataNodes
+  , toDataNodeTypes
   , toDataEdge
   ) where
 
@@ -19,7 +20,20 @@ import qualified ArchitectureDiagram.Data.Edge as Data
 import ArchitectureDiagram.Source.Json.Types
 
 toDataGraph :: Graph -> Data.Graph
-toDataGraph g = Data.Graph (_gName g) (toDataNodes $ _gNodes g) (map toDataEdge $ _gEdges g)
+toDataGraph g = Data.Graph
+  { Data._gName = _gName g
+  , Data._gNodes = toDataNodes (_gNodes g)
+  , Data._gEdges = map toDataEdge (_gEdges g)
+  , Data._gNodeTypes = toDataNodeTypes (_gNodeTypes g)
+  }
+
+toDataNodeTypes :: NodeTypes -> Map Data.NodeTypeRef Data.NodeType
+toDataNodeTypes = Map.mapKeys Data.NodeTypeRef . Map.map toDataNodeType
+
+toDataNodeType :: NodeType -> Data.NodeType
+toDataNodeType nt = Data.NodeType
+  { Data._ntStyles = fromMaybe [] (_ntStyles nt)
+  }
 
 toDataNodes :: Nodes -> Map Data.NodeRef Data.Node
 toDataNodes = Map.mapKeys Data.NodeRef . Map.mapWithKey toDataNode

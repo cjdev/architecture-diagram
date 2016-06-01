@@ -25,6 +25,9 @@
     { "from": "node_b", "to": "node_e" }
   ],
   "nodeTypes": {
+    "typeA": {
+      "styles": []
+    }
   },
   "edgeTypes": {
   }
