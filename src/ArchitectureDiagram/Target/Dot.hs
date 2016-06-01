@@ -1,16 +1,20 @@
 {-# LANGUAGE FlexibleInstances #-}
 {-# LANGUAGE OverloadedStrings #-}
+{-# LANGUAGE TupleSections #-}
 module ArchitectureDiagram.Target.Dot
   ( ToStatement(..)
+  , NodeLeafest
   , toGraph
+  , nodeLeafest
   ) where
 
 import qualified Language.Dot.Syntax as Dot
 import qualified Data.Map as Map
+import Data.Map (Map)
 import Data.Text (Text)
 import Data.Text.Conversions (fromText)
 import Data.List (intercalate)
-import Data.Maybe (catMaybes)
+import Data.Maybe (catMaybes, fromMaybe)
 import Language.Dot.Syntax hiding (Graph)
 
 import ArchitectureDiagram.Data.Node (Node(..), NodeRef(..), NodeStyle(..), Shape(..))
@@ -77,16 +81,39 @@ toClusterStatement ref node = SubgraphStatement $ NewSubgraph (clusterId ref) st
 clusterId :: NodeRef -> Maybe Id
 clusterId ref = Just . StringId . fromText $ "cluster_" `mappend` (unNodeRef ref)
 
-instance ToStatement Edge where
-  toStatement e = EdgeStatement
-    [ ENodeId NoEdge (NodeId (StringId $ fromText (_eFrom e)) Nothing)
-    , ENodeId DirectedEdge (NodeId (StringId $ fromText (_eTo e)) Nothing)
+instance ToStatement (NodeLeafest, Edge) where
+  toStatement (NodeLeafest leafest, e) = EdgeStatement
+    [ ENodeId NoEdge (NodeId (StringId $ fromText fromEdge) Nothing)
+    , ENodeId DirectedEdge (NodeId (StringId $ fromText toEdge) Nothing)
     ]
-    rankAttribute
+    (rankAttribute ++ toEdgeClusterAttribute ++ fromEdgeClusterAttribute)
     where
       rankAttribute = case _eRank e of
         To -> [ AttributeSetValue (NameId "dir") (StringId "back") ]
         From -> []
+
+      toEdge = fromMaybe (_eTo e) toEdgeLeafest
+      toEdgeLeafest = unNodeRef <$> Map.lookup (NodeRef $ _eTo  e) leafest
+
+      toEdgeClusterAttribute = case toEdgeLeafest of
+        Nothing -> []
+        Just _ -> let
+          cluster = fromText $ "cluster_" `mappend` _eTo e
+          in case _eRank e of
+            To -> [ AttributeSetValue (NameId "ltail") (StringId cluster) ]
+            From -> [ AttributeSetValue (NameId "lhead") (StringId cluster) ]
+
+      fromEdge = fromMaybe (_eFrom e) fromEdgeLeafest
+      fromEdgeLeafest = unNodeRef <$> Map.lookup (NodeRef $ _eFrom e) leafest
+
+      fromEdgeClusterAttribute = case fromEdgeLeafest of
+        Nothing -> []
+        Just _ -> let
+          cluster = fromText $ "cluster_" `mappend` _eFrom e
+          in case _eRank e of
+            From -> [ AttributeSetValue (NameId "ltail") (StringId cluster) ]
+            To -> [ AttributeSetValue (NameId "lhead") (StringId cluster) ]
+
 
 toGraph :: Graph -> Dot.Graph
 toGraph graph = Dot.Graph UnstrictGraph DirectedGraph (Just $ StringId (fromText $ _gName graph))
@@ -96,5 +123,19 @@ toGraph graph = Dot.Graph UnstrictGraph DirectedGraph (Just $ StringId (fromText
     , AssignmentStatement (NameId "compound") (NameId "true")
     ] ++
     (map toStatement (Map.toList $ _gNodes graph)) ++
-    (map toStatement (_gEdges graph))
+    (map (\e -> toStatement (leafest, e)) (_gEdges graph))
   )
+  where
+    leafest = nodeLeafest (_gNodes graph)
+
+newtype NodeLeafest = NodeLeafest { unNodeLeafest :: Map NodeRef NodeRef }
+  deriving (Show, Eq)
+
+someChildNodeKey :: Node -> Maybe NodeRef
+someChildNodeKey = fmap (fst . fst) . Map.minViewWithKey . _nChildren
+
+nodeLeafest :: Map NodeRef Node -> NodeLeafest
+nodeLeafest nodes = NodeLeafest $ Map.fromList $ catMaybes (map nodeChild $ Map.toList nodes)
+  where
+    nodeChild :: (NodeRef, Node) -> Maybe (NodeRef, NodeRef)
+    nodeChild (ref, node) = (ref,) <$> someChildNodeKey node

@@ -53,6 +53,13 @@ spec = do
       let expected = Map.fromList [("node_a", Data.Node "a" Data.Record [] Nothing Map.empty)]
       actual `shouldBe` expected
 
+    it "should convert a node its child" $ do
+      let nodeB = ("node_b", Node Nothing (Just "b") (Just Map.empty))
+      let nodeA = ("node_a", Node Nothing (Just "a") (Just $ Map.fromList [nodeB]))
+      let actual = toDataNodes baseNodeTypes $ Map.fromList [nodeA]
+      let expected = Map.fromList [("node_a", Data.Node "a" Data.Record [] Nothing (Map.fromList [("node_b", Data.Node "b" Data.Record [] Nothing Map.empty )]))]
+      actual `shouldBe` expected
+
   describe "toDataEdge" $ do
     it "should take an console edge and return an adpated edge" $ do
       let actual = toDataEdge $ Edge "node_a" "node_b"

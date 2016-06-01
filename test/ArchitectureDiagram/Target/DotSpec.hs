@@ -8,7 +8,7 @@ import qualified Data.Map as Map
 import Data.Text (Text)
 import Language.Dot.Syntax hiding (Graph)
 
-import ArchitectureDiagram.Target.Dot (toStatement, toGraph)
+import ArchitectureDiagram.Target.Dot (toStatement, toGraph, NodeLeafest, nodeLeafest)
 import ArchitectureDiagram.Data.Node
 import ArchitectureDiagram.Data.Edge
 import ArchitectureDiagram.Data.Graph
@@ -36,6 +36,9 @@ baseNode = Node
   , _nWidth = Nothing
   , _nChildren = Map.empty
   }
+
+baseNodeLeafest :: NodeLeafest
+baseNodeLeafest = nodeLeafest Map.empty
 
 baseEdge :: Edge
 baseEdge = Edge [] "node_a" "node_b" From
@@ -100,20 +103,31 @@ spec = do
 
   describe "architecture diagram edges to dot statements" $ do
     it "should convert an edge with edge rank 'from' (a -> b)" $ do
-      let actual = toStatement baseEdge
+      let actual = toStatement (baseNodeLeafest, baseEdge)
       let expected = EdgeStatement
             [ ENodeId NoEdge (NodeId (StringId "node_a") Nothing )
             , ENodeId DirectedEdge (NodeId (StringId "node_b") Nothing )
             ]
             []
       actual `shouldBe` expected
+
     it "should convert an edge with edge rank 'to' (b <- a)" $ do
-      let actual = toStatement baseEdge { _eRank = To }
+      let actual = toStatement (baseNodeLeafest, baseEdge { _eRank = To })
       let expected = EdgeStatement
             [ ENodeId NoEdge (NodeId (StringId "node_a") Nothing )
             , ENodeId DirectedEdge (NodeId (StringId "node_b") Nothing )
             ]
             [ AttributeSetValue (NameId "dir") (StringId "back") ]
+      actual `shouldBe` expected
+
+    it "should create an edge where the parent-node/cluster points to another node" $ do
+      let leafest = nodeLeafest $ Map.fromList [(NodeRef "node_a", baseNode { _nChildren = Map.fromList [(NodeRef "node_c", baseNode)] })]
+      let actual = toStatement (leafest, baseEdge)
+      let expected = EdgeStatement
+            [ ENodeId NoEdge (NodeId (StringId "node_c") Nothing )
+            , ENodeId DirectedEdge (NodeId (StringId "node_b") Nothing )
+            ]
+            [ AttributeSetValue (NameId "ltail") (StringId "cluster_node_a") ]
       actual `shouldBe` expected
 
   describe "architecture diagram graph to dot graph" $ do
@@ -153,5 +167,5 @@ spec = do
       let edgeA = baseEdge
       let actual = toGraph baseGraph { _gNodes = Map.fromList [nodeA, nodeB], _gEdges = [edgeA] }
       let expected = Dot.Graph UnstrictGraph DirectedGraph (Just $ StringId "graph")
-            (prependStatements ++ [ toStatement nodeA, toStatement nodeB, toStatement edgeA ])
+            (prependStatements ++ [ toStatement nodeA, toStatement nodeB, toStatement (baseNodeLeafest, edgeA) ])
       actual `shouldBe` expected

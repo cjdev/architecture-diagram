@@ -5,7 +5,12 @@
       "type": "type_a"
     },
     "node_b": {
-      "name": "b"
+      "name": "b",
+      "children": {
+        "node_f": {
+          "type": "type_a"
+        }
+      }
     },
     "node_c": {
       "name": "c"
