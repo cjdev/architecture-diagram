@@ -8,7 +8,13 @@
       "name": "b",
       "children": {
         "node_f": {
-          "type": "type_a"
+          "type": "type_a",
+          "children": {
+            "node_g": {
+              "name": "g",
+              "type": "type_a"
+            }
+          }
         }
       }
     },

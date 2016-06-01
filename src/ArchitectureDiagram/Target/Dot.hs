@@ -10,6 +10,7 @@ module ArchitectureDiagram.Target.Dot
 
 import qualified Language.Dot.Syntax as Dot
 import qualified Data.Map as Map
+import Control.Applicative
 import Data.Map (Map)
 import Data.Text (Text)
 import Data.Text.Conversions (fromText)
@@ -132,7 +133,12 @@ newtype NodeLeafest = NodeLeafest { unNodeLeafest :: Map NodeRef NodeRef }
   deriving (Show, Eq)
 
 someChildNodeKey :: Node -> Maybe NodeRef
-someChildNodeKey = fmap (fst . fst) . Map.minViewWithKey . _nChildren
+someChildNodeKey n = let
+  mKeyNode = fmap fst (Map.minViewWithKey $ _nChildren n)
+  mKey = fmap fst mKeyNode
+  mNode = fmap snd mKeyNode
+  mChildKey = someChildNodeKey =<< mNode
+  in mChildKey <|> mKey
 
 nodeLeafest :: Map NodeRef Node -> NodeLeafest
 nodeLeafest nodes = NodeLeafest $ Map.fromList $ catMaybes (map nodeChild $ Map.toList nodes)

@@ -130,6 +130,21 @@ spec = do
             [ AttributeSetValue (NameId "ltail") (StringId "cluster_node_a") ]
       actual `shouldBe` expected
 
+    it "should create an edge where the grandparent-node/cluster points to another node" $ do
+      let leafest = nodeLeafest $ Map.fromList [(NodeRef "node_a", baseNode
+            { _nChildren = Map.fromList [(NodeRef "node_c", baseNode
+              { _nChildren = Map.fromList [(NodeRef "node_d", baseNode)]
+              } )]
+            })]
+      let actual = toStatement (leafest, baseEdge)
+      let expected = EdgeStatement
+            [ ENodeId NoEdge (NodeId (StringId "node_d") Nothing )
+            , ENodeId DirectedEdge (NodeId (StringId "node_b") Nothing )
+            ]
+            [ AttributeSetValue (NameId "ltail") (StringId "cluster_node_a") ]
+      actual `shouldBe` expected
+
+
   describe "architecture diagram graph to dot graph" $ do
     it "should create an empty graph" $ do
       let actual = toGraph baseGraph { _gName = "empty" }
