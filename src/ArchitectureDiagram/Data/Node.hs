@@ -1,5 +1,6 @@
 {-# LANGUAGE TemplateHaskell #-}
 {-# LANGUAGE GeneralizedNewtypeDeriving #-}
+{-# LANGUAGE OverloadedStrings #-}
 module ArchitectureDiagram.Data.Node
  ( Shape(..)
  , NodeStyle(..)
@@ -9,7 +10,8 @@ module ArchitectureDiagram.Data.Node
  , NodeTypeRef(..)
  ) where
 
-import Data.Aeson (ToJSON(..), FromJSON(..))
+import Control.Monad (mzero)
+import Data.Aeson (ToJSON(..), FromJSON(..), Value(..))
 import Data.Aeson.TH
 import Data.Text (Text)
 import Data.Map (Map)
@@ -23,9 +25,25 @@ data Shape
   | Box3d
   deriving (Show, Eq)
 
+instance FromJSON Shape where
+  parseJSON (String "record") = pure Record
+  parseJSON (String "box3d") = pure Box3d
+  parseJSON _ = mzero
+
+instance ToJSON Shape where
+  toJSON Record = String "record"
+  toJSON Box3d = String "box3d"
+
 data NodeStyle
   = Rounded
   deriving (Show, Eq)
+
+instance FromJSON NodeStyle where 
+  parseJSON (String "rounded") = pure Rounded
+  parseJSON _ = mzero
+
+instance ToJSON NodeStyle where
+  toJSON Rounded = "rounded"
 
 newtype NodeRef = NodeRef { unNodeRef :: Text }
   deriving (Show, Eq, Ord, IsString, ToJSON, FromJSON)
@@ -44,9 +62,3 @@ data Node = Node
 data NodeType = NodeType
   { _ntStyles :: [NodeStyle]
   } deriving (Show, Eq)
-
-$(deriveToJSON firstToLowerOptions ''Shape)
-$(deriveFromJSON firstToLowerOptions ''Shape)
-
-$(deriveToJSON firstToLowerOptions ''NodeStyle)
-$(deriveFromJSON firstToLowerOptions ''NodeStyle)

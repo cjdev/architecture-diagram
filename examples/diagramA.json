@@ -2,6 +2,7 @@
   "name": "diagramA",
   "nodes": {
     "node_a": {
+      "type": "type_a"
     },
     "node_b": {
       "name": "b"
@@ -10,6 +11,7 @@
       "name": "c"
     },
     "node_d": {
+      "type": "type_a",
       "name": "d"
     },
     "node_e": {
@@ -25,8 +27,8 @@
     { "from": "node_b", "to": "node_e" }
   ],
   "nodeTypes": {
-    "typeA": {
-      "styles": []
+    "type_a": {
+      "styles": ["rounded"]
     }
   },
   "edgeTypes": {

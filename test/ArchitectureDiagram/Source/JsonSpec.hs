@@ -11,25 +11,45 @@ import qualified ArchitectureDiagram.Data.Edge as Data
 import ArchitectureDiagram.Source.Json.Types
 import ArchitectureDiagram.Source.Json.Adapt
 
+baseNodeTypes :: Map.Map Data.NodeTypeRef Data.NodeType
+baseNodeTypes = Map.fromList
+  [ (Data.NodeTypeRef "type_a", Data.NodeType {
+       Data._ntStyles = [Data.Rounded]
+    })
+  ]
+
 spec :: Spec
 spec = do
   describe "toDataNodes" $ do
     it "should take an empty map and return an empty list" $ do
-      let actual = toDataNodes Map.empty
+      let actual = toDataNodes Map.empty Map.empty
       let expected = Map.empty
       actual `shouldBe` expected
-    it "should take a singleton map and return a singleton list of the adapted node (Nothing Nothing)" $ do
-      let actual = toDataNodes $ Map.singleton "node_a" (Node Nothing Nothing)
+
+    it "should take a singleton map and return a singleton list of the adapted node (Nothing Nothing Nothing)" $ do
+      let actual = toDataNodes Map.empty $ Map.singleton "node_a" (Node Nothing Nothing Nothing)
       let expected = Map.fromList [("node_a", Data.Node "node_a" Data.Record [] Nothing Map.empty)]
       actual `shouldBe` expected
 
-    it "should take a singleton map and return a singleton list of the adapted node (Just Nothing)" $ do
-      let actual = toDataNodes $ Map.singleton "node_a" (Node (Just "a") Nothing)
+    it "should take a singleton map and return a singleton list of the adapted node (Nothing Just Nothing)" $ do
+      let actual = toDataNodes Map.empty $ Map.singleton "node_a" (Node Nothing (Just "a") Nothing)
       let expected = Map.fromList [("node_a", Data.Node "a" Data.Record [] Nothing Map.empty)]
       actual `shouldBe` expected
 
-    it "should take a singleton map and return a singleton list of the adapted node (Just Just)" $ do
-      let actual = toDataNodes $ Map.singleton "node_a" (Node (Just "a") (Just Map.empty))
+    it "should take a singleton map and return a singleton list of the adapted node (Nothing Just Just)" $ do
+      let actual = toDataNodes Map.empty $ Map.singleton "node_a" (Node Nothing (Just "a") (Just Map.empty))
+      let expected = Map.fromList [("node_a", Data.Node "a" Data.Record [] Nothing Map.empty)]
+      actual `shouldBe` expected
+
+    it "should convert a node using its type" $ do
+      let nodeA = ("node_a", Node (Just "type_a") (Just "a") (Just Map.empty))
+      let actual = toDataNodes baseNodeTypes $ Map.fromList [nodeA]
+      let expected = Map.fromList [("node_a", Data.Node "a" Data.Record [Data.Rounded] Nothing Map.empty)]
+      actual `shouldBe` expected
+
+    it "should try convert a node using its type but fail to find the type and use the defaults instead" $ do
+      let nodeA = ("node_a", Node (Just "type_b") (Just "a") (Just Map.empty))
+      let actual = toDataNodes baseNodeTypes $ Map.fromList [nodeA]
       let expected = Map.fromList [("node_a", Data.Node "a" Data.Record [] Nothing Map.empty)]
       actual `shouldBe` expected
 

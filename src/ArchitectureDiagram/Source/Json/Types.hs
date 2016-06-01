@@ -26,7 +26,8 @@ import qualified ArchitectureDiagram.Data.Node as Data
 import ArchitectureDiagram.Source.Json.Aeson (dropPrefixOptions)
 
 data Node = Node
-  { _nName :: Maybe Text
+  { _nType :: Maybe Text
+  , _nName :: Maybe Text
   , _nChildren :: Maybe Nodes
   } deriving (Show, Eq, Generic)
 
