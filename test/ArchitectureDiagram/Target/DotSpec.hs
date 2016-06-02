@@ -25,8 +25,6 @@ baseGraph = Graph
   { _gName = "graph"
   , _gNodes = Map.empty
   , _gEdges = []
-  , _gNodeTypes = Map.empty
-  , _gEdgeTypes = Map.empty
   }
 
 baseNode :: Node
@@ -176,14 +174,6 @@ spec = do
       let actual = toGraph baseGraph { _gNodes = nodes }
       let expected = Dot.Graph UnstrictGraph DirectedGraph (Just $ StringId "graph")
             (prependStatements ++ [ nodeStatement nodeA, nodeStatement nodeB ])
-      actual `shouldBe` expected
-
-    it "should create a graph with a node type" $ do
-      let nodeTypeA = ("type_a", baseNodeType)
-      let nodeTypes = Map.fromList [nodeTypeA]
-      let actual = toGraph baseGraph { _gNodeTypes = nodeTypes }
-      let expected = Dot.Graph UnstrictGraph DirectedGraph (Just $ StringId "graph")
-            (prependStatements ++ [])
       actual `shouldBe` expected
 
     it "should create a graph with nodes and an edge" $ do

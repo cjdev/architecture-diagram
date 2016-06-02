@@ -28,8 +28,6 @@ toDataGraph g = let
     { Data._gName = _gName g
     , Data._gNodes = toDataNodes nodeTypes (_gNodes g)
     , Data._gEdges = map (toDataEdge edgeTypes) (_gEdges g)
-    , Data._gEdgeTypes = edgeTypes
-    , Data._gNodeTypes = nodeTypes
     }
 
 toDataNodeTypes :: NodeTypes -> Map Data.NodeTypeRef Data.NodeType
