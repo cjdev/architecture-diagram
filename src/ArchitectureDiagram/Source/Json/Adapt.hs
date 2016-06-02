@@ -3,6 +3,7 @@ module ArchitectureDiagram.Source.Json.Adapt
   , toDataNodes
   , toDataNodeTypes
   , toDataEdge
+  , toDataEdgeTypes
   ) where
 
 import qualified Data.Map as Map
@@ -22,10 +23,12 @@ import ArchitectureDiagram.Source.Json.Types
 toDataGraph :: Graph -> Data.Graph
 toDataGraph g = let
   nodeTypes = toDataNodeTypes (_gNodeTypes g)
+  edgeTypes = toDataEdgeTypes (_gEdgeTypes g)
   in Data.Graph
     { Data._gName = _gName g
     , Data._gNodes = toDataNodes nodeTypes (_gNodes g)
-    , Data._gEdges = map toDataEdge (_gEdges g)
+    , Data._gEdges = map (toDataEdge edgeTypes) (_gEdges g)
+    , Data._gEdgeTypes = edgeTypes
     , Data._gNodeTypes = nodeTypes
     }
 
@@ -55,10 +58,25 @@ toDataNode types ref node = Data.Node
       nt <- Map.lookup (Data.NodeTypeRef ty) types
       return $ access nt
 
-toDataEdge :: Edge -> Data.Edge
-toDataEdge e = Data.Edge
-  { Data._eStyles = []
-  , Data._eFrom = _eFrom e
-  , Data._eTo = _eTo e
+toDataEdge :: Map Data.EdgeTypeRef Data.EdgeType -> Edge -> Data.Edge
+toDataEdge types edge = Data.Edge
+  { Data._eFrom = _eFrom edge
+  , Data._eTo = _eTo edge
   , Data._eRank = Data.From
+  , Data._eStyles = fromMaybe [] (fromType Data._etStyles)
+  }
+  where
+    fromType :: (Data.EdgeType -> a) -> Maybe a
+    fromType access = do
+      ty <- _eType edge
+      et <- Map.lookup ty types
+      return $ access et
+
+
+toDataEdgeTypes :: EdgeTypes -> Map Data.EdgeTypeRef Data.EdgeType
+toDataEdgeTypes = Map.mapKeys Data.EdgeTypeRef . Map.map toDataEdgeType
+
+toDataEdgeType :: EdgeType -> Data.EdgeType
+toDataEdgeType et = Data.EdgeType
+  { Data._etStyles = fromMaybe [] (_etStyles et)
   }

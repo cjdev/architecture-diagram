@@ -23,6 +23,7 @@ import Data.Maybe (fromMaybe)
 import Data.Text (Text)
 
 import qualified ArchitectureDiagram.Data.Node as Data
+import qualified ArchitectureDiagram.Data.Edge as Data
 import ArchitectureDiagram.Source.Json.Aeson (dropPrefixOptions)
 
 data Node = Node
@@ -40,14 +41,16 @@ data NodeType = NodeType
 type NodeTypes = Map Text NodeType
 
 data Edge = Edge
-  { _eFrom :: Data.NodeRef
+  { _eType :: Maybe Data.EdgeTypeRef
+  , _eFrom :: Data.NodeRef
   , _eTo :: Data.NodeRef
   } deriving (Show, Eq, Generic)
 
 type Edges = [Edge]
 
 data EdgeType = EdgeType
-  deriving (Show, Eq, Generic)
+  { _etStyles :: Maybe [Data.EdgeStyle]
+  } deriving (Show, Eq, Generic)
 
 type EdgeTypes = Map Text EdgeType
 
@@ -60,7 +63,7 @@ data Graph = Graph
   } deriving (Show, Eq, Generic)
 
 instance Default Graph where
-  def = Graph "default" Map.empty Map.empty [] Map.empty
+  def = Graph "default" Map.empty Map.empty [] Map.empty 
 
 $(deriveToJSON (dropPrefixOptions "_n") ''Node)
 $(deriveFromJSON (dropPrefixOptions "_n") ''Node)

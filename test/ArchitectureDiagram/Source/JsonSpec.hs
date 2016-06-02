@@ -18,6 +18,13 @@ baseNodeTypes = Map.fromList
     })
   ]
 
+baseEdgeTypes :: Map.Map Data.EdgeTypeRef Data.EdgeType
+baseEdgeTypes = Map.fromList
+  [ (Data.EdgeTypeRef "edge_a", Data.EdgeType {
+       Data._etStyles = [Data.Dashed]
+    })
+  ]
+
 spec :: Spec
 spec = do
   describe "toDataNodes" $ do
@@ -62,6 +69,11 @@ spec = do
 
   describe "toDataEdge" $ do
     it "should take an console edge and return an adpated edge" $ do
-      let actual = toDataEdge $ Edge "node_a" "node_b"
-      let expected = Data.Edge [] "node_a" "node_b" Data.From
+      let edgeA = Edge
+            { _eType = Just "edge_a"
+            , _eFrom = "node_a"
+            , _eTo = "node_b"
+            }
+      let actual = toDataEdge baseEdgeTypes edgeA
+      let expected = Data.Edge [Data.Dashed] "node_a" "node_b" Data.From
       actual `shouldBe` expected

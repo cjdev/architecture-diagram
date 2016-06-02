@@ -2,10 +2,11 @@
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE TupleSections #-}
 module ArchitectureDiagram.Target.Dot
-  ( ToStatement(..)
+  ( nodeStatement
   , NodeLeafest
   , toGraph
   , nodeLeafest
+  , edgeStatement
   ) where
 
 import qualified Language.Dot.Syntax as Dot
@@ -22,20 +23,17 @@ import ArchitectureDiagram.Data.Node (Node(..), NodeRef(..), NodeStyle(..), Shap
 import ArchitectureDiagram.Data.Edge (Edge(..), EdgeStyle(..), EdgeRank(..))
 import ArchitectureDiagram.Data.Graph (Graph(..))
 
-class ToStatement a where
-  toStatement :: a -> Statement
-
-instance ToStatement (NodeRef, Node) where
-  toStatement (ref, node) =
-    if Map.null (_nChildren node)
-      then toNodeStatement ref node
-      else toClusterStatement ref node
+nodeStatement :: (NodeRef, Node) -> Statement
+nodeStatement (ref, node) = 
+  if Map.null (_nChildren node)
+    then toNodeStatement ref node
+    else toClusterStatement ref node
 
 toNodeStatement :: NodeRef -> Node -> Statement
-toNodeStatement ref node = NodeStatement (nodeId ref) (toAttributes node)
+toNodeStatement ref node = NodeStatement (nodeId ref) (toNodeAttributes node)
 
-toAttributes :: Node -> [Attribute]
-toAttributes n = attributes ++ catMaybes mAttributes
+toNodeAttributes :: Node -> [Attribute]
+toNodeAttributes n = attributes ++ catMaybes mAttributes
   where
     attributes :: [Attribute]
     attributes =
@@ -62,9 +60,7 @@ shapeId Record = "record"
 shapeId Box3d = "box3d"
 
 nodeStyles :: [NodeStyle] -> Maybe Attribute
-nodeStyles xs
-  | null xs = Nothing
-  | otherwise = Just $ AttributeSetValue (NameId "style") (StringId $ intercalate "," (map nodeStyleId xs))
+nodeStyles = style nodeStyleId
 
 nodeStyleId :: NodeStyle -> String
 nodeStyleId Rounded = "rounded"
@@ -77,42 +73,62 @@ toClusterStatement ref node = SubgraphStatement $ NewSubgraph (Just $ clusterId 
   where
     statements =
       [ AssignmentStatement (NameId "label") (StringId . fromText $ _nName node) ] ++
-      (map toStatement . Map.toList $ _nChildren node)
+      (map nodeStatement . Map.toList $ _nChildren node)
 
 clusterId :: NodeRef -> Id
 clusterId ref = StringId . fromText $ "cluster_" `mappend` (unNodeRef ref)
 
-instance ToStatement (NodeLeafest, Edge) where
-  toStatement (NodeLeafest leafest, e) = EdgeStatement
-    [ ENodeId NoEdge (nodeId fromEdge)
-    , ENodeId DirectedEdge (nodeId toEdge)
-    ]
-    (catMaybes
+edgeStatement :: (NodeLeafest, Edge) -> Statement
+edgeStatement (nl@(NodeLeafest leafest), e) = EdgeStatement
+  [ ENodeId NoEdge (nodeId fromEdge)
+  , ENodeId DirectedEdge (nodeId toEdge)
+  ]
+  (toEdgeAttributes toEdgeLeafest fromEdgeLeafest e)
+  where
+    toEdge = fromMaybe (_eTo e) toEdgeLeafest
+    toEdgeLeafest = Map.lookup (_eTo e) leafest
+    fromEdge = fromMaybe (_eFrom e) fromEdgeLeafest
+    fromEdgeLeafest = Map.lookup (_eFrom e) leafest
+
+toEdgeAttributes :: Maybe NodeRef -> Maybe NodeRef -> Edge -> [Attribute]
+toEdgeAttributes toEdge fromEdge e = attributes ++ catMaybes mAttributes
+  where
+    attributes :: [Attribute]
+    attributes = []
+
+    mAttributes :: [Maybe Attribute]
+    mAttributes =
       [ rankAttribute (_eRank e)
       , toEdgeClusterAttribute
       , fromEdgeClusterAttribute
+      , edgeStyles (_eStyles e)
       ]
-    )
-    where
-      toEdge = fromMaybe (_eTo e) toEdgeLeafest
-      toEdgeLeafest = Map.lookup (_eTo e) leafest
-      fromEdge = fromMaybe (_eFrom e) fromEdgeLeafest
-      fromEdgeLeafest = Map.lookup (_eFrom e) leafest
-      toEdgeClusterAttribute = case toEdgeLeafest of
-        Nothing -> Nothing
-        Just _ -> Just $ case _eRank e of
-          To -> AttributeSetValue (NameId "ltail") (clusterId $ _eTo e)
-          From -> AttributeSetValue (NameId "lhead") (clusterId $ _eTo e)
-      fromEdgeClusterAttribute = case fromEdgeLeafest of
-        Nothing -> Nothing
-        Just _ -> Just $ case _eRank e of
-          From -> AttributeSetValue (NameId "ltail") (clusterId $ _eFrom e)
-          To -> AttributeSetValue (NameId "lhead") (clusterId $ _eFrom e)
+    toEdgeClusterAttribute = case toEdge of
+      Nothing -> Nothing
+      Just _ -> Just $ case _eRank e of
+        To -> AttributeSetValue (NameId "ltail") (clusterId $ _eTo e)
+        From -> AttributeSetValue (NameId "lhead") (clusterId $ _eTo e)
+    fromEdgeClusterAttribute = case fromEdge of
+      Nothing -> Nothing
+      Just _ -> Just $ case _eRank e of
+        From -> AttributeSetValue (NameId "ltail") (clusterId $ _eFrom e)
+        To -> AttributeSetValue (NameId "lhead") (clusterId $ _eFrom e)
 
 rankAttribute :: EdgeRank -> Maybe Attribute
 rankAttribute rank = case rank of
   To -> Just $ AttributeSetValue (NameId "dir") (StringId "back")
   From -> Nothing
+
+edgeStyles :: [EdgeStyle] -> Maybe Attribute
+edgeStyles = style edgeStyleId
+
+edgeStyleId :: EdgeStyle -> String
+edgeStyleId Dashed = "dashed"
+
+style :: (a -> String) -> [a] -> Maybe Attribute
+style f xs
+  | null xs = Nothing
+  | otherwise = Just $ AttributeSetValue (NameId "style") (StringId $ intercalate "," (map f xs))
 
 toGraph :: Graph -> Dot.Graph
 toGraph graph = Dot.Graph UnstrictGraph DirectedGraph (Just $ StringId (fromText $ _gName graph))
@@ -121,8 +137,8 @@ toGraph graph = Dot.Graph UnstrictGraph DirectedGraph (Just $ StringId (fromText
     , AssignmentStatement (NameId "rankdir") (NameId "TB")
     , AssignmentStatement (NameId "compound") (NameId "true")
     ] ++
-    (map toStatement (Map.toList $ _gNodes graph)) ++
-    (map (\e -> toStatement (leafest, e)) (_gEdges graph))
+    (map nodeStatement (Map.toList $ _gNodes graph)) ++
+    (map (\e -> edgeStatement (leafest, e)) (_gEdges graph))
   )
   where
     leafest = nodeLeafest (_gNodes graph)

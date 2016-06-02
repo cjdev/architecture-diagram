@@ -8,7 +8,7 @@ import qualified Data.Map as Map
 import Data.Text (Text)
 import Language.Dot.Syntax hiding (Graph)
 
-import ArchitectureDiagram.Target.Dot (toStatement, toGraph, NodeLeafest, nodeLeafest)
+import ArchitectureDiagram.Target.Dot (nodeStatement, edgeStatement, toGraph, NodeLeafest, nodeLeafest)
 import ArchitectureDiagram.Data.Node
 import ArchitectureDiagram.Data.Edge
 import ArchitectureDiagram.Data.Graph
@@ -26,6 +26,7 @@ baseGraph = Graph
   , _gNodes = Map.empty
   , _gEdges = []
   , _gNodeTypes = Map.empty
+  , _gEdgeTypes = Map.empty
   }
 
 baseNode :: Node
@@ -52,7 +53,7 @@ spec :: Spec
 spec = do
   describe "architecture diagram nodes to dot statements" $ do
     it "should convert the bare minimium node with a record shape" $ do
-      let actual = toStatement $ ("node_n" :: NodeRef, baseNode)
+      let actual = nodeStatement $ ("node_n" :: NodeRef, baseNode)
       let expected = NodeStatement
             (NodeId (StringId "node_n") Nothing)
             [ AttributeSetValue (NameId "label") (StringId "n")
@@ -61,7 +62,7 @@ spec = do
       actual `shouldBe` expected
 
     it "should convert the bare minimium node with a box3d shape" $ do
-      let actual = toStatement $ ("node_n" :: NodeRef, baseNode { _nShape = Box3d })
+      let actual = nodeStatement $ ("node_n" :: NodeRef, baseNode { _nShape = Box3d })
       let expected = NodeStatement
             (NodeId (StringId "node_n") Nothing)
             [ AttributeSetValue (NameId "label") (StringId "n")
@@ -70,7 +71,7 @@ spec = do
       actual `shouldBe` expected
     
     it "should convert the node with a rounded style" $ do
-      let actual = toStatement $ ("node_n" :: NodeRef, baseNode { _nStyles = [Rounded] })
+      let actual = nodeStatement $ ("node_n" :: NodeRef, baseNode { _nStyles = [Rounded] })
       let expected = NodeStatement
             (NodeId (StringId "node_n") Nothing)
             [ AttributeSetValue (NameId "label") (StringId "n")
@@ -80,7 +81,7 @@ spec = do
       actual `shouldBe` expected
     
     it "should convert the node with a width" $ do
-      let actual = toStatement $ ("node_n" :: NodeRef, baseNode { _nWidth = Just 0 })
+      let actual = nodeStatement $ ("node_n" :: NodeRef, baseNode { _nWidth = Just 0 })
       let expected = NodeStatement
             (NodeId (StringId "node_n") Nothing)
             [ AttributeSetValue (NameId "label") (StringId "n")
@@ -90,7 +91,7 @@ spec = do
       actual `shouldBe` expected
 
     it "should convert the node to a subgraph" $ do
-      let actual = toStatement $ ("c" :: NodeRef, baseNode { _nName = "c", _nChildren = Map.fromList [("node_n", baseNode)] })
+      let actual = nodeStatement $ ("c" :: NodeRef, baseNode { _nName = "c", _nChildren = Map.fromList [("node_n", baseNode)] })
       let expected = SubgraphStatement $ NewSubgraph (Just $ StringId "cluster_c")
             [ AssignmentStatement (NameId "label") (StringId "c")
             , NodeStatement
@@ -102,8 +103,18 @@ spec = do
       actual `shouldBe` expected
 
   describe "architecture diagram edges to dot statements" $ do
+    it "should create an edge with dashed style" $ do
+      let actual = edgeStatement (baseNodeLeafest, baseEdge { _eStyles = [Dashed] })
+      let expected = EdgeStatement
+            [ ENodeId NoEdge (NodeId (StringId "node_a") Nothing )
+            , ENodeId DirectedEdge (NodeId (StringId "node_b") Nothing )
+            ]
+            [ AttributeSetValue (NameId "style") (StringId "dashed")
+            ]
+      actual `shouldBe` expected
+
     it "should convert an edge with edge rank 'from' (a -> b)" $ do
-      let actual = toStatement (baseNodeLeafest, baseEdge)
+      let actual = edgeStatement (baseNodeLeafest, baseEdge)
       let expected = EdgeStatement
             [ ENodeId NoEdge (NodeId (StringId "node_a") Nothing )
             , ENodeId DirectedEdge (NodeId (StringId "node_b") Nothing )
@@ -112,7 +123,7 @@ spec = do
       actual `shouldBe` expected
 
     it "should convert an edge with edge rank 'to' (b <- a)" $ do
-      let actual = toStatement (baseNodeLeafest, baseEdge { _eRank = To })
+      let actual = edgeStatement (baseNodeLeafest, baseEdge { _eRank = To })
       let expected = EdgeStatement
             [ ENodeId NoEdge (NodeId (StringId "node_a") Nothing )
             , ENodeId DirectedEdge (NodeId (StringId "node_b") Nothing )
@@ -122,7 +133,7 @@ spec = do
 
     it "should create an edge where the parent-node/cluster points to another node" $ do
       let leafest = nodeLeafest $ Map.fromList [(NodeRef "node_a", baseNode { _nChildren = Map.fromList [(NodeRef "node_c", baseNode)] })]
-      let actual = toStatement (leafest, baseEdge)
+      let actual = edgeStatement (leafest, baseEdge)
       let expected = EdgeStatement
             [ ENodeId NoEdge (NodeId (StringId "node_c") Nothing )
             , ENodeId DirectedEdge (NodeId (StringId "node_b") Nothing )
@@ -136,15 +147,14 @@ spec = do
               { _nChildren = Map.fromList [(NodeRef "node_d", baseNode)]
               } )]
             })]
-      let actual = toStatement (leafest, baseEdge)
+      let actual = edgeStatement (leafest, baseEdge)
       let expected = EdgeStatement
             [ ENodeId NoEdge (NodeId (StringId "node_d") Nothing )
             , ENodeId DirectedEdge (NodeId (StringId "node_b") Nothing )
             ]
             [ AttributeSetValue (NameId "ltail") (StringId "cluster_node_a") ]
       actual `shouldBe` expected
-
-
+ 
   describe "architecture diagram graph to dot graph" $ do
     it "should create an empty graph" $ do
       let actual = toGraph baseGraph { _gName = "empty" }
@@ -156,7 +166,7 @@ spec = do
       let nodes = Map.fromList [nodeA]
       let actual = toGraph baseGraph { _gNodes = nodes }
       let expected = Dot.Graph UnstrictGraph DirectedGraph (Just $ StringId "graph")
-            (prependStatements ++ [ toStatement nodeA ])
+            (prependStatements ++ [ nodeStatement nodeA ])
       actual `shouldBe` expected
 
     it "should create a graph with nodes" $ do
@@ -165,7 +175,7 @@ spec = do
       let nodes = Map.fromList [nodeA, nodeB]
       let actual = toGraph baseGraph { _gNodes = nodes }
       let expected = Dot.Graph UnstrictGraph DirectedGraph (Just $ StringId "graph")
-            (prependStatements ++ [ toStatement nodeA, toStatement nodeB ])
+            (prependStatements ++ [ nodeStatement nodeA, nodeStatement nodeB ])
       actual `shouldBe` expected
 
     it "should create a graph with a node type" $ do
@@ -179,8 +189,8 @@ spec = do
     it "should create a graph with nodes and an edge" $ do
       let nodeA = ("node_a" :: NodeRef, baseNode { _nName = "a" })
       let nodeB = ("node_b" :: NodeRef, baseNode { _nName = "b" })
-      let edgeA = baseEdge
-      let actual = toGraph baseGraph { _gNodes = Map.fromList [nodeA, nodeB], _gEdges = [edgeA] }
+      let edgeA = (baseNodeLeafest, baseEdge)
+      let actual = toGraph baseGraph { _gNodes = Map.fromList [nodeA, nodeB], _gEdges = [snd $ edgeA] }
       let expected = Dot.Graph UnstrictGraph DirectedGraph (Just $ StringId "graph")
-            (prependStatements ++ [ toStatement nodeA, toStatement nodeB, toStatement (baseNodeLeafest, edgeA) ])
+            (prependStatements ++ [ nodeStatement nodeA, nodeStatement nodeB, edgeStatement edgeA ])
       actual `shouldBe` expected
