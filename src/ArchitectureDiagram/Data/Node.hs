@@ -11,6 +11,7 @@ module ArchitectureDiagram.Data.Node
  ) where
 
 import Control.Monad (mzero)
+import Data.Default (Default(..))
 import Data.Aeson (ToJSON(..), FromJSON(..), Value(..))
 import Data.Aeson.TH
 import Data.Text (Text)
@@ -60,5 +61,12 @@ data Node = Node
   } deriving (Show, Eq)
 
 data NodeType = NodeType
-  { _ntStyles :: [NodeStyle]
+  { _ntName :: Maybe Text
+  , _ntStyles :: [NodeStyle]
   } deriving (Show, Eq)
+
+instance Default NodeType where
+  def = NodeType
+    { _ntName = Nothing
+    , _ntStyles = []
+    }

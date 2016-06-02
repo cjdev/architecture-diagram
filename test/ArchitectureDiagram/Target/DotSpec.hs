@@ -45,6 +45,7 @@ baseEdge = Edge [] "node_a" "node_b" From
 baseNodeType :: NodeType
 baseNodeType = NodeType
   { _ntStyles = []
+  , _ntName = Nothing
   }
 
 spec :: Spec

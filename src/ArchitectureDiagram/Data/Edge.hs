@@ -9,6 +9,7 @@ module ArchitectureDiagram.Data.Edge
  ) where
 
 import Control.Monad (mzero)
+import Data.Default (Default(..))
 import Data.String (IsString)
 import Data.Aeson (FromJSON(..), ToJSON(..), Value(..))
 import Data.Text (Text)
@@ -45,3 +46,8 @@ data Edge = Edge
 data EdgeType = EdgeType
   { _etStyles :: [EdgeStyle]
   } deriving (Show, Eq)
+
+instance Default EdgeType where
+  def = EdgeType
+    { _etStyles = []
+    }

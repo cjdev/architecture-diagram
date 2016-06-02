@@ -1,5 +1,4 @@
 {-# LANGUAGE GeneralizedNewtypeDeriving #-}
-{-# GHC_OPTIONS -fno-warn-orphan-instances #-}
 module Wiring where
 
 import qualified ArchitectureDiagram.Console.Impl.IO as Console

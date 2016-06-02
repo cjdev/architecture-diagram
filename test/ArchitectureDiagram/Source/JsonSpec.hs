@@ -4,6 +4,7 @@ module ArchitectureDiagram.Source.JsonSpec (spec) where
 import Test.Hspec
 
 import qualified Data.Map as Map
+import Data.Default (def)
 
 import qualified ArchitectureDiagram.Data.Graph as Data
 import qualified ArchitectureDiagram.Data.Node as Data
@@ -13,16 +14,21 @@ import ArchitectureDiagram.Source.Json.Adapt
 
 baseNodeTypes :: Map.Map Data.NodeTypeRef Data.NodeType
 baseNodeTypes = Map.fromList
-  [ (Data.NodeTypeRef "type_a", Data.NodeType {
-       Data._ntStyles = [Data.Rounded]
-    })
+  [ ( "type_a"
+    , Data.NodeType
+       { Data._ntStyles = [Data.Rounded]
+       , Data._ntName = Nothing
+       }
+    )
   ]
 
 baseEdgeTypes :: Map.Map Data.EdgeTypeRef Data.EdgeType
 baseEdgeTypes = Map.fromList
-  [ (Data.EdgeTypeRef "edge_a", Data.EdgeType {
-       Data._etStyles = [Data.Dashed]
-    })
+  [ ( "edge_a"
+    , Data.EdgeType
+        { Data._etStyles = [Data.Dashed]
+        }
+    )
   ]
 
 spec :: Spec
@@ -48,11 +54,18 @@ spec = do
       let expected = Map.fromList [("node_a", Data.Node "a" Data.Record [] Nothing Map.empty)]
       actual `shouldBe` expected
 
-    it "should convert a node using its type" $ do
-      let nodeA = ("node_a", Node (Just "type_a") (Just "a") (Just Map.empty))
-      let actual = toDataNodes baseNodeTypes $ Map.fromList [nodeA]
-      let expected = Map.fromList [("node_a", Data.Node "a" Data.Record [Data.Rounded] Nothing Map.empty)]
-      actual `shouldBe` expected
+    describe "should convert a node using its type" $ do
+      it "should convert the styles" $ do
+        let nodeA = ("node_a", Node (Just "type_a") (Just "a") (Just Map.empty))
+        let actual = toDataNodes baseNodeTypes $ Map.fromList [nodeA]
+        let expected = Map.fromList [("node_a", Data.Node "a" Data.Record [Data.Rounded] Nothing Map.empty)]
+        actual `shouldBe` expected
+
+      it "should convert the default name" $ do
+        let nodeA = ("node_a", Node (Just "some_type") Nothing (Just Map.empty))
+        let actual = toDataNodes (Map.singleton "some_type" (def { Data._ntName = Just "some name" })) (Map.fromList [nodeA])
+        let expected = Map.fromList [("node_a", Data.Node "some name" Data.Record [] Nothing Map.empty)]
+        actual `shouldBe` expected
 
     it "should try convert a node using its type but fail to find the type and use the defaults instead" $ do
       let nodeA = ("node_a", Node (Just "type_b") (Just "a") (Just Map.empty))

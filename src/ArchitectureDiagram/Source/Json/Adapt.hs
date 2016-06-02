@@ -7,6 +7,8 @@ module ArchitectureDiagram.Source.Json.Adapt
   ) where
 
 import qualified Data.Map as Map
+import Control.Monad (join)
+import Control.Applicative ((<|>))
 import GHC.Generics
 import Data.Aeson
 import Data.Aeson.TH
@@ -35,7 +37,8 @@ toDataNodeTypes = Map.mapKeys Data.NodeTypeRef . Map.map toDataNodeType
 
 toDataNodeType :: NodeType -> Data.NodeType
 toDataNodeType nt = Data.NodeType
-  { Data._ntStyles = fromMaybe [] (_ntStyles nt)
+  { Data._ntName = _ntName nt
+  , Data._ntStyles = fromMaybe [] (_ntStyles nt)
   }
 
 toDataNodes :: Map Data.NodeTypeRef Data.NodeType -> Nodes -> Map Data.NodeRef Data.Node
@@ -43,7 +46,7 @@ toDataNodes types = Map.mapKeys Data.NodeRef . Map.mapWithKey (toDataNode types)
 
 toDataNode :: Map Data.NodeTypeRef Data.NodeType -> Text -> Node -> Data.Node
 toDataNode types ref node = Data.Node
-  { Data._nName = fromMaybe ref (_nName node)
+  { Data._nName = fromMaybe ref (_nName node <|> join (fromType Data._ntName))
   , Data._nShape = Data.Record
   , Data._nStyles = fromMaybe [] (fromType Data._ntStyles)
   , Data._nWidth = Nothing

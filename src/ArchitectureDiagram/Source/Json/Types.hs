@@ -32,11 +32,25 @@ data Node = Node
   , _nChildren :: Maybe Nodes
   } deriving (Show, Eq, Generic)
 
+instance Default Node where
+  def = Node
+    { _nType = Nothing
+    , _nName = Nothing
+    , _nChildren = Nothing
+    }
+
 type Nodes = Map Text Node
 
 data NodeType = NodeType
   { _ntStyles :: Maybe [Data.NodeStyle]
+  , _ntName :: Maybe Text
   } deriving (Show, Eq, Generic)
+
+instance Default NodeType where
+  def = NodeType
+    { _ntStyles = Nothing
+    , _ntName = Nothing
+    }
 
 type NodeTypes = Map Text NodeType
 
@@ -51,6 +65,11 @@ type Edges = [Edge]
 data EdgeType = EdgeType
   { _etStyles :: Maybe [Data.EdgeStyle]
   } deriving (Show, Eq, Generic)
+
+instance Default EdgeType where
+  def = EdgeType
+    { _etStyles = Nothing
+    }
 
 type EdgeTypes = Map Text EdgeType
 
