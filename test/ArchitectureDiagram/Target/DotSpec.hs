@@ -8,7 +8,7 @@ import qualified Data.Map as Map
 import Data.Text (Text)
 import Language.Dot.Syntax hiding (Graph)
 
-import ArchitectureDiagram.Target.Dot (nodeStatement, edgeStatement, toGraph, NodeLeafest, nodeLeafest)
+import ArchitectureDiagram.Target.Dot (nodeStatement, edgeStatement, toGraph, NodeLeafest, nodeLeafest, listAllNodes)
 import ArchitectureDiagram.Data.Node
 import ArchitectureDiagram.Data.Edge
 import ArchitectureDiagram.Data.Graph
@@ -193,4 +193,15 @@ spec = do
       let actual = toGraph baseGraph { _gNodes = Map.fromList [nodeA, nodeB], _gEdges = [snd $ edgeA] }
       let expected = Dot.Graph UnstrictGraph DirectedGraph (Just $ StringId "graph")
             (prependStatements ++ [ nodeStatement nodeA, nodeStatement nodeB, edgeStatement edgeA ])
+      actual `shouldBe` expected
+
+  describe "listAllNodes" $ do
+    it "should flatten out all the nodes into a single list (nodes should still contain children)"  $ do
+      let nodeA = ("node_a" :: NodeRef, baseNode)
+      let nodeB = ("node_b" :: NodeRef, baseNode { _nChildren = Map.fromList [nodeA] })
+      let nodeC = ("node_c" :: NodeRef, baseNode { _nChildren = Map.fromList [nodeB] })
+      let nodeD = ("node_d" :: NodeRef, baseNode { _nChildren = Map.fromList [nodeC] })
+      let nodes = Map.fromList [nodeD]
+      let actual = Map.fromList $ listAllNodes nodes
+      let expected = Map.fromList $ [nodeD, nodeC, nodeB, nodeA]
       actual `shouldBe` expected

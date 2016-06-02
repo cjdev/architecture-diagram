@@ -7,6 +7,7 @@ module ArchitectureDiagram.Target.Dot
   , toGraph
   , nodeLeafest
   , edgeStatement
+  , listAllNodes
   ) where
 
 import qualified Language.Dot.Syntax as Dot
@@ -155,7 +156,16 @@ someChildNodeKey n = let
   in mChildKey <|> mKey
 
 nodeLeafest :: Map NodeRef Node -> NodeLeafest
-nodeLeafest nodes = NodeLeafest $ Map.fromList $ catMaybes (map nodeChild $ Map.toList nodes)
+nodeLeafest nodes = NodeLeafest $ Map.fromList $ catMaybes (map nodeChild $ listAllNodes nodes)
   where
     nodeChild :: (NodeRef, Node) -> Maybe (NodeRef, NodeRef)
     nodeChild (ref, node) = (ref,) <$> someChildNodeKey node
+
+listAllNodes :: Map NodeRef Node -> [(NodeRef, Node)]
+listAllNodes nodes = Map.toList nodes ++ childCousins ++ grandCousins
+  where
+    grandCousins :: [(NodeRef, Node)]
+    grandCousins = if null childCousins then [] else listAllNodes (Map.fromList childCousins)
+
+    childCousins :: [(NodeRef, Node)]
+    childCousins = concat . map (Map.toList . _nChildren . snd) . Map.toList $ nodes
