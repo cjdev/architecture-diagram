@@ -1,0 +1,48 @@
+name: "diagramA"
+
+nodeTypes: 
+  type_a: 
+    styles: 
+      - "rounded"
+edgeTypes: {}
+
+nodes: 
+  node_a: 
+    type: "type_a"
+  node_b: 
+    name: "b"
+    children: 
+      node_f: 
+        type: "type_a"
+        children: 
+          node_g: 
+            name: "g"
+            type: "type_a"
+  node_c: 
+    name: "c"
+  node_d: 
+    type: "type_a"
+    name: "d"
+  node_e: 
+    name: "e"
+
+edges: 
+  - 
+    from: "node_b"
+    to: "node_a"
+  - 
+    from: "node_c"
+    to: "node_b"
+  - 
+    from: "node_c"
+    to: "node_a"
+  - 
+    from: "node_d"
+    to: "node_c"
+  - 
+    from: "node_d"
+    to: "node_b"
+  - 
+    from: "node_b"
+    to: "node_e"
+

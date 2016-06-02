@@ -3,7 +3,7 @@ name:
 version:
   0.1.0.0
 synopsis:
-  Generate an architecture diagram (JSON -> GraphViz Dot)
+  Generate an architecture diagram (YAML -> GraphViz Dot)
 description:
   Please see README.md
 homepage:
@@ -48,6 +48,7 @@ library
     , bytestring
     , mtl
     , data-default
+    , yaml
   default-language:
     Haskell2010
 

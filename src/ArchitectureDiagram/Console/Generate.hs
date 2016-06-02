@@ -8,7 +8,8 @@ import qualified Data.ByteString.Lazy as BL
 import Control.Monad.Error.Class
 import Data.Aeson (decode, encode)
 import Data.Text (Text)
-import Data.Text.Conversions (convertText, UTF8(..))
+import Data.Yaml (decodeEither)
+import Data.Text.Conversions (convertText, UTF8(..), toText)
 import Language.Dot.Pretty (renderDot)
 
 import ArchitectureDiagram.Console.Class
@@ -18,11 +19,11 @@ import ArchitectureDiagram.Target.Dot (toGraph)
 generate :: Console m => m ()
 generate = do
   contents <- readStdin
-  case decode contents of
-    Nothing -> do
-      writeStderr "Unable to parse input\n"
+  case decodeEither (BL.toStrict contents) of
+    Left str -> do
+      writeStderr $ toText str
       failure
-    Just graph -> do
+    Right graph -> do
       let dotGraph = toGraph $ toDataGraph graph
       let (UTF8 bytes) = convertText $ renderDot dotGraph
       writeStdout bytes
