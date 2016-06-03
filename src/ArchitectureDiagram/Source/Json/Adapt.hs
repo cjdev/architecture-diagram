@@ -50,7 +50,7 @@ toDataNode types ref node = Data.Node
   , Data._nShape = Data.Record
   , Data._nStyles = fromMaybe [] (fromType Data._ntStyles)
   , Data._nWidth = Nothing
-  , Data._nChildren = fromMaybe Map.empty (toDataNodes types <$> _nChildren node)
+  , Data._nNodes = fromMaybe Map.empty (toDataNodes types <$> _nNodes node)
   }
   where
     fromType :: (Data.NodeType -> a) -> Maybe a

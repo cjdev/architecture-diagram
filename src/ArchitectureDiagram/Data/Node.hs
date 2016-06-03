@@ -57,7 +57,7 @@ data Node = Node
   , _nShape :: Shape
   , _nStyles :: [NodeStyle]
   , _nWidth :: Maybe Float
-  , _nChildren :: Map NodeRef Node
+  , _nNodes :: Map NodeRef Node
   } deriving (Show, Eq)
 
 data NodeType = NodeType

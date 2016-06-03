@@ -11,10 +11,10 @@ nodes:
     type: "type_a"
   node_b: 
     name: "b"
-    children: 
+    nodes:
       node_f: 
         type: "type_a"
-        children: 
+        nodes:
           node_g: 
             name: "g"
             type: "type_a"

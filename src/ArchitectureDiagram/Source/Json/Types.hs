@@ -29,14 +29,14 @@ import ArchitectureDiagram.Source.Json.Aeson (dropPrefixOptions)
 data Node = Node
   { _nType :: Maybe Text
   , _nName :: Maybe Text
-  , _nChildren :: Maybe Nodes
+  , _nNodes :: Maybe Nodes
   } deriving (Show, Eq, Generic)
 
 instance Default Node where
   def = Node
     { _nType = Nothing
     , _nName = Nothing
-    , _nChildren = Nothing
+    , _nNodes = Nothing
     }
 
 type Nodes = Map Text Node

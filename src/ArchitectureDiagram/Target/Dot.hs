@@ -26,7 +26,7 @@ import ArchitectureDiagram.Data.Graph (Graph(..))
 
 nodeStatement :: (NodeRef, Node) -> Statement
 nodeStatement (ref, node) = 
-  if Map.null (_nChildren node)
+  if Map.null (_nNodes node)
     then toNodeStatement ref node
     else toClusterStatement ref node
 
@@ -74,7 +74,7 @@ toClusterStatement ref node = SubgraphStatement $ NewSubgraph (Just $ clusterId 
   where
     statements =
       [ AssignmentStatement (NameId "label") (StringId . fromText $ _nName node) ] ++
-      (map nodeStatement . Map.toList $ _nChildren node)
+      (map nodeStatement . Map.toList $ _nNodes node)
 
 clusterId :: NodeRef -> Id
 clusterId ref = StringId . fromText $ "cluster_" `mappend` (unNodeRef ref)
@@ -149,7 +149,7 @@ newtype NodeLeafest = NodeLeafest { unNodeLeafest :: Map NodeRef NodeRef }
 
 someChildNodeKey :: Node -> Maybe NodeRef
 someChildNodeKey n = let
-  mKeyNode = fmap fst (Map.minViewWithKey $ _nChildren n)
+  mKeyNode = fmap fst (Map.minViewWithKey $ _nNodes n)
   mKey = fmap fst mKeyNode
   mNode = fmap snd mKeyNode
   mChildKey = someChildNodeKey =<< mNode
@@ -168,4 +168,4 @@ listAllNodes nodes = Map.toList nodes ++ childCousins ++ grandCousins
     grandCousins = if null childCousins then [] else listAllNodes (Map.fromList childCousins)
 
     childCousins :: [(NodeRef, Node)]
-    childCousins = concat . map (Map.toList . _nChildren . snd) . Map.toList $ nodes
+    childCousins = concat . map (Map.toList . _nNodes . snd) . Map.toList $ nodes

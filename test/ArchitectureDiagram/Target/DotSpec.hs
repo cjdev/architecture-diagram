@@ -33,7 +33,7 @@ baseNode = Node
   , _nShape = Record
   , _nStyles = []
   , _nWidth = Nothing
-  , _nChildren = Map.empty
+  , _nNodes = Map.empty
   }
 
 baseNodeLeafest :: NodeLeafest
@@ -90,7 +90,7 @@ spec = do
       actual `shouldBe` expected
 
     it "should convert the node to a subgraph" $ do
-      let actual = nodeStatement $ ("c" :: NodeRef, baseNode { _nName = "c", _nChildren = Map.fromList [("node_n", baseNode)] })
+      let actual = nodeStatement $ ("c" :: NodeRef, baseNode { _nName = "c", _nNodes = Map.fromList [("node_n", baseNode)] })
       let expected = SubgraphStatement $ NewSubgraph (Just $ StringId "cluster_c")
             [ AssignmentStatement (NameId "label") (StringId "c")
             , NodeStatement
@@ -131,7 +131,7 @@ spec = do
       actual `shouldBe` expected
 
     it "should create an edge where the parent-node/cluster points to another node" $ do
-      let leafest = nodeLeafest $ Map.fromList [(NodeRef "node_a", baseNode { _nChildren = Map.fromList [(NodeRef "node_c", baseNode)] })]
+      let leafest = nodeLeafest $ Map.fromList [(NodeRef "node_a", baseNode { _nNodes = Map.fromList [(NodeRef "node_c", baseNode)] })]
       let actual = edgeStatement (leafest, baseEdge)
       let expected = EdgeStatement
             [ ENodeId NoEdge (NodeId (StringId "node_c") Nothing )
@@ -142,8 +142,8 @@ spec = do
 
     it "should create an edge where the grandparent-node/cluster points to another node" $ do
       let leafest = nodeLeafest $ Map.fromList [(NodeRef "node_a", baseNode
-            { _nChildren = Map.fromList [(NodeRef "node_c", baseNode
-              { _nChildren = Map.fromList [(NodeRef "node_d", baseNode)]
+            { _nNodes = Map.fromList [(NodeRef "node_c", baseNode
+              { _nNodes = Map.fromList [(NodeRef "node_d", baseNode)]
               } )]
             })]
       let actual = edgeStatement (leafest, baseEdge)
@@ -189,9 +189,9 @@ spec = do
   describe "listAllNodes" $ do
     it "should flatten out all the nodes into a single list (nodes should still contain children)"  $ do
       let nodeA = ("node_a" :: NodeRef, baseNode)
-      let nodeB = ("node_b" :: NodeRef, baseNode { _nChildren = Map.fromList [nodeA] })
-      let nodeC = ("node_c" :: NodeRef, baseNode { _nChildren = Map.fromList [nodeB] })
-      let nodeD = ("node_d" :: NodeRef, baseNode { _nChildren = Map.fromList [nodeC] })
+      let nodeB = ("node_b" :: NodeRef, baseNode { _nNodes = Map.fromList [nodeA] })
+      let nodeC = ("node_c" :: NodeRef, baseNode { _nNodes = Map.fromList [nodeB] })
+      let nodeD = ("node_d" :: NodeRef, baseNode { _nNodes = Map.fromList [nodeC] })
       let nodes = Map.fromList [nodeD]
       let actual = Map.fromList $ listAllNodes nodes
       let expected = Map.fromList $ [nodeD, nodeC, nodeB, nodeA]
